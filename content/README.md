@@ -64,6 +64,47 @@ missing fields, wrong types or values) stop at the first one; once the YAML
 reads, every rule above is checked and every violation reported. The site validates only the subset it
 needs to render a page (see `apps/web/README.md`).
 
+## Graph rules
+
+Once every file passes the rules above, the concepts are checked as a graph:
+
+1. Every slug in `prerequisites` and in `edges[].to` names an existing concept.
+2. A concept does not list itself, in `prerequisites` or as an edge target.
+3. The same edge (same source, target and type) is not declared twice. Two
+   edges in opposite directions, or two edges of different types between the
+   same concepts, are fine.
+4. A prerequisite is never in a higher layer than the concept that needs it.
+   Prerequisites in the same layer are allowed.
+5. Prerequisites never form a cycle (`a` needs `b`, `b` needs `c`, `c` needs
+   `a`). Each group of concepts caught in cycles is reported once, with one
+   cycle through it such as `a → b → c → a`, starting from the alphabetically
+   first slug. Fix that one and run again: another cycle in the same group
+   shows up then.
+
+Graph rules run only when no file has an error of its own.
+
+Run every check from anywhere in the repository:
+
+```sh
+cargo run -p lexicon --locked -- validate                    # content/concepts of this repo
+cargo run -p lexicon --locked -- validate --content <dir>    # any other directory
+```
+
+Exit codes:
+
+- `0`: everything passes; prints `validated <n> concepts, <e> edges`.
+- `1`: content or graph problems, each on its own line as
+  `<file>: <message>`. File problems come in file-name order and, within a
+  file, in front matter order; graph problems are sorted by file.
+- `2`: the directory is missing or unreadable, or, without `--content`, no
+  directory holding both `Cargo.lock` and `content/concepts` was found at or
+  above the current one.
+
+Without `--content`, file paths are printed relative to the current
+directory (`content/concepts/<file>` from the repository root).
+
+CI runs it on every pull request.
+
 ## Example
 
 ````mdx

@@ -50,7 +50,7 @@ fn optional_fields_default_to_empty() {
 #[test]
 fn missing_directory_is_an_io_error() {
     let err = load_concepts(&fixture("does-not-exist")).unwrap_err();
-    assert!(matches!(err, LoadError::Io(_)), "{err:?}");
+    assert!(matches!(err, LoadError::Io { .. }), "{err:?}");
 }
 
 fn content_errors(case: &str) -> Vec<lexicon_core::ContentError> {

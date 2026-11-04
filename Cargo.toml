@@ -19,3 +19,5 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 serde-saphyr = { version = "2.1", default-features = false, features = ["deserialize"] }
 url = "2.5"
+petgraph = { version = "0.8", default-features = false, features = ["std", "graphmap"] }
+assert_cmd = "2.2"

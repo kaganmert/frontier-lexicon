@@ -29,6 +29,18 @@
     "frontier-lexicon-rust#lint": {
       "command": ["cargo", "lint"]
     },
+    "frontier-lexicon-rust#validate": {
+      "command": [
+        "cargo",
+        "run",
+        "-p",
+        "lexicon",
+        "--locked",
+        "--",
+        "validate"
+      ],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"]
+    },
     "web#generate": {
       "inputs": [
         "content-collections.ts",

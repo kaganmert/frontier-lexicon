@@ -75,3 +75,6 @@ jobs:
       - run: cargo lint
 
       - run: cargo test --workspace --locked
+
+      # Schema and graph rules over content/concepts (see content/README.md).
+      - run: cargo run -p lexicon --locked -- validate

@@ -10,7 +10,7 @@ Click a node for the theory, a hands-on exercise, and the concepts you need firs
 ## Structure
 
 - Concepts are nodes in a layered directed acyclic graph. A `PREREQUISITE_OF`
-  edge always points from a lower layer to a higher one, so the graph doubles as
+  edge never points from a higher layer to a lower one, so the graph doubles as
   a learning path.
 - Other edge types (`MEASURES`, `MITIGATES`, `CAUSES`, `RELATED_TO`) carry the
   concept map itself and are free in direction.
@@ -32,6 +32,7 @@ pnpm exec turbo run check lint test build format:check --filter=web --filter=//
 cargo fmt --all --check
 cargo lint   # alias for clippy, see .cargo/config.toml
 cargo test --workspace --locked
+cargo run -p lexicon --locked -- validate   # schema and graph rules over content/concepts
 ```
 
 Concept files under `content/` are not Prettier-checked; their shape is owned
