@@ -41,7 +41,7 @@ Unknown fields are errors, including inside `edges` and `sources` items.
 | `prerequisites` | no | List of slugs this concept builds on, no duplicates. Each one becomes a `PREREQUISITE_OF` edge pointing to this concept. |
 | `edges` | no | List of `{ type, to }`. `type` is `MEASURES`, `MITIGATES`, `CAUSES` or `RELATED_TO`; `to` is a slug. `PREREQUISITE_OF` is not allowed here: use `prerequisites` on the dependent concept. |
 | `sources` | no | List of `{ title, url }`. `title` non-empty and single line; `url` an absolute `http` or `https` URL. |
-| `provenance` | yes | `seed` (the hand-picked starting set), `mined` (proposed by `lexicon-mine`) or `manual` (added by hand later). |
+| `provenance` | yes | `seed`, `mined` or `manual`; see [Provenance](#provenance). |
 
 Optional lists may be left out, but not written as an empty key (`aliases:`
 with nothing after it); use `aliases: []` or drop the line.
@@ -111,20 +111,25 @@ CI runs it on every pull request.
 
 - `seed`: the term name was taken from the
   [Dictionary of AI Coding](https://github.com/mattpocock/dictionary-of-ai-coding)
-  at commit `ed1ebed3975cba04ed5e74c6ca73659274beb754`. Only the name is taken,
+  at commit `ed1ebed3975cba04ed5e74c6ca73659274beb754` (the value of
+  `DICTIONARY_COMMIT` in `scripts/check-overlap.mjs`). Only the name is taken,
   as a candidate; that repository has no license, so no sentence, description,
   alias, example or arrangement of it is reused. Layers, tracks, prerequisites,
   edges, descriptions and questions here are written independently. Where a
   coined name has a generic equivalent, the concept uses the generic name and
   keeps the coined one as an alias.
 - `mined`: proposed by `lexicon-mine` from external sources.
-- `manual`: added by hand, not from the dictionary.
+- `manual`: added by hand, not taken from the dictionary, whether in the
+  initial seed or later.
 
 The files carry nothing beyond the `provenance` value; the schema has no field
 for it.
 
 `scripts/check-overlap.mjs` compares every concept file with the dictionary at
-that commit and fails on any shared run of 8 consecutive words. It needs
+that commit (its entries and its README) and fails on any shared run of 8
+consecutive words; exit code 2 means the dictionary could not be fetched. An
+8-word window does not catch close paraphrase or a reused alias, so review
+those by eye. It needs
 network access, so CI does not run it; run it by hand whenever concept text
 changes and paste the output in the pull request:
 

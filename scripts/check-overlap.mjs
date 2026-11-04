@@ -1,60 +1,53 @@
-// Fails if any concept file shares a run of 8 consecutive words with the
-// Dictionary of AI Coding (github.com/mattpocock/dictionary-of-ai-coding).
-// That repository has no license: only its term names may be reused, never
-// its prose (see content/README.md, "Provenance").
+// Overlap guard for the concept seed; why and when to run it is in
+// content/README.md, "Provenance".
 //
-// Usage, from the repository root: node scripts/check-overlap.mjs
-// Node 24, no dependencies, no git. Needs network access, so CI does not run
-// it; run it by hand whenever concept text changes and paste the output in
-// the pull request.
+//   node scripts/check-overlap.mjs
+//
+// Exit 0: no shared window. Exit 1: at least one concept file shares a run of
+// WINDOW consecutive words with the dictionary. Exit 2: the dictionary could
+// not be fetched or the concept files could not be read.
 
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
-/** The dictionary commit the seed was taken from; content/README.md quotes it. */
+/** Pinned dictionary commit; content/README.md quotes the same value. */
 const DICTIONARY_COMMIT = "ed1ebed3975cba04ed5e74c6ca73659274beb754";
-const REPO = "mattpocock/dictionary-of-ai-coding";
+const DICTIONARY_REPO = "mattpocock/dictionary-of-ai-coding";
 const WINDOW = 8;
-const CONCEPTS_DIR = "content/concepts";
+const CONCEPTS_DIR = path.resolve(import.meta.dirname, "../content/concepts");
 
-async function fetchOk(url) {
+async function fetchText(url) {
   const res = await fetch(url, {
     headers: { "User-Agent": "frontier-lexicon" },
   });
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
-  return res;
+  return res.text();
 }
 
+/** Every entry under dictionary/ plus the generated README that repeats them. */
 async function dictionaryFiles() {
-  const treeUrl = `https://api.github.com/repos/${REPO}/git/trees/${DICTIONARY_COMMIT}?recursive=1`;
-  const { tree, truncated } = await (await fetchOk(treeUrl)).json();
+  const treeUrl = `https://api.github.com/repos/${DICTIONARY_REPO}/git/trees/${DICTIONARY_COMMIT}?recursive=1`;
+  const { tree, truncated } = JSON.parse(await fetchText(treeUrl));
   if (truncated) throw new Error(`${treeUrl}: tree listing truncated`);
   const paths = tree
     .map((entry) => entry.path)
-    .filter((p) => p.startsWith("dictionary/") && p.endsWith(".md"));
+    .filter(
+      (p) =>
+        p === "README.md" || (p.startsWith("dictionary/") && p.endsWith(".md")),
+    );
   return Promise.all(
     paths.map(async (p) => {
-      const url = `https://raw.githubusercontent.com/${REPO}/${DICTIONARY_COMMIT}/${p.split("/").map(encodeURIComponent).join("/")}`;
-      return {
-        name: p,
-        text: dictionaryText(await (await fetchOk(url)).text()),
-      };
+      const encoded = p.split("/").map(encodeURIComponent).join("/");
+      const url = `https://raw.githubusercontent.com/${DICTIONARY_REPO}/${DICTIONARY_COMMIT}/${encoded}`;
+      return { name: p, text: await fetchText(url) };
     }),
   );
 }
 
-/** The `description` front matter value plus the body. */
-function dictionaryText(raw) {
-  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (!match) return raw;
-  const [, frontMatter, body] = match;
-  const description = frontMatter.match(/^description:\s*(.*)$/m)?.[1] ?? "";
-  return `${description}\n${body}`;
-}
-
-/** Link text instead of links, lowercase, punctuation removed, words only. */
+/** Whole file, front matter included: link text instead of links, NFC, lowercase, words only. */
 function words(text) {
   return text
+    .normalize("NFC")
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
     .toLowerCase()
     .replace(/[^\p{L}\p{N}\s]+/gu, " ")
@@ -62,42 +55,51 @@ function words(text) {
     .filter(Boolean);
 }
 
-function windows(text) {
-  const w = words(text);
-  const out = [];
-  for (let i = 0; i + WINDOW <= w.length; i++) {
-    out.push(w.slice(i, i + WINDOW).join(" "));
+function windowsOf(text) {
+  const tokens = words(text);
+  const windows = [];
+  for (let i = 0; i + WINDOW <= tokens.length; i++) {
+    windows.push(tokens.slice(i, i + WINDOW).join(" "));
   }
-  return out;
+  return windows;
 }
 
-const dictionary = await dictionaryFiles();
-const source = new Map();
-for (const { name, text } of dictionary) {
-  for (const win of windows(text)) {
-    if (!source.has(win)) source.set(win, name);
-  }
-}
-
-const concepts = (await readdir(CONCEPTS_DIR))
-  .filter((f) => f.endsWith(".mdx"))
-  .sort();
-let hits = 0;
-for (const file of concepts) {
-  const text = await readFile(path.join(CONCEPTS_DIR, file), "utf8");
-  const seen = new Set();
-  for (const win of windows(text)) {
-    if (source.has(win) && !seen.has(win)) {
-      seen.add(win);
-      hits++;
-      console.log(
-        `${CONCEPTS_DIR}/${file}: "${win}" (also in ${source.get(win)})`,
-      );
+async function main() {
+  const dictionary = await dictionaryFiles();
+  const dictionaryWindows = new Map();
+  for (const { name, text } of dictionary) {
+    for (const window of windowsOf(text)) {
+      if (!dictionaryWindows.has(window)) dictionaryWindows.set(window, name);
     }
   }
+
+  const conceptFiles = (await readdir(CONCEPTS_DIR))
+    .filter((f) => f.endsWith(".mdx"))
+    .sort();
+  let hits = 0;
+  for (const file of conceptFiles) {
+    const text = await readFile(path.join(CONCEPTS_DIR, file), "utf8");
+    const reported = new Set();
+    for (const window of windowsOf(text)) {
+      if (dictionaryWindows.has(window) && !reported.has(window)) {
+        reported.add(window);
+        hits++;
+        console.log(
+          `content/concepts/${file}: "${window}" (also in ${dictionaryWindows.get(window)})`,
+        );
+      }
+    }
+  }
+
+  console.log(
+    `${dictionary.length} dictionary files at ${DICTIONARY_COMMIT.slice(0, 12)}, ${conceptFiles.length} concept files, ${hits} shared ${WINDOW}-word windows`,
+  );
+  return hits === 0 ? 0 : 1;
 }
 
-console.log(
-  `${dictionary.length} dictionary files at ${DICTIONARY_COMMIT.slice(0, 12)}, ${concepts.length} concept files, ${hits} shared ${WINDOW}-word windows`,
-);
-process.exitCode = hits === 0 ? 0 : 1;
+try {
+  process.exitCode = await main();
+} catch (err) {
+  console.error(`check-overlap: ${err.message}`);
+  process.exitCode = 2;
+}
