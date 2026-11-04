@@ -2,6 +2,9 @@
 apps/
 packages/
 crates/
+# Concept files are content, not code: Prettier's MDX output is unreliable and
+# their shape is owned by the content schema and `lexicon validate`.
+content/
 target/
 pnpm-lock.yaml
 Cargo.lock

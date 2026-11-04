@@ -30,6 +30,9 @@ cargo lint   # alias for clippy, see .cargo/config.toml
 cargo test --workspace --locked
 ```
 
+Concept files under `content/` are not Prettier-checked; their shape is owned
+by the content schema and `lexicon validate`.
+
 The Rust toolchain is pinned in `rust-toolchain.toml` (rustup picks it up
 locally and in CI). Bump it in its own PR so a new clippy lint never lands in
 the middle of unrelated work.

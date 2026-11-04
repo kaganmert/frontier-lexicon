@@ -35,8 +35,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # Turbo task cache and Next's build cache, restored from the latest
-      # run on any branch when there is no exact match.
+      # Turbo task cache and Next's build cache. Without an exact match GitHub
+      # restores the newest entry from this branch or from main.
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
@@ -49,6 +49,11 @@ jobs:
       # three tasks that regenerate the content never run concurrently.
       # `//#format:check` covers the root files, `web#format:check` the package.
       - run: pnpm exec turbo run check lint test build format:check --filter=web --filter=//
+
+      # Every run restores the previous entry and adds to it, so drop task
+      # artifacts untouched for a week before the post-step saves the cache.
+      - if: always()
+        run: find .turbo/cache -type f -mtime +7 -delete
 
   rust:
     name: rust

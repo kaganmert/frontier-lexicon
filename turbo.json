@@ -20,9 +20,7 @@
       "cache": false
     },
     "format:check": {},
-    "//#format:check": {
-      "inputs": ["*.json", "*.md", "*.yaml", ".github/**", ".prettierignore"]
-    },
+    "//#format:check": {},
     "dev": {
       "persistent": true,
       "cache": false
