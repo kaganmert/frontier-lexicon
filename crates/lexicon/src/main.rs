@@ -2,7 +2,11 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(name = "lexicon", version, about = "frontier-lexicon content and graph tooling")]
+#[command(
+    name = "lexicon",
+    version,
+    about = "frontier-lexicon content and graph tooling"
+)]
 struct Cli {
     #[command(subcommand)]
     command: Command,

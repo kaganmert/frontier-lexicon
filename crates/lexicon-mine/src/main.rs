@@ -2,7 +2,11 @@ use anyhow::Result;
 use clap::Parser;
 
 #[derive(Parser)]
-#[command(name = "lexicon-mine", version, about = "Collect candidate terms from external sources")]
+#[command(
+    name = "lexicon-mine",
+    version,
+    about = "Collect candidate terms from external sources"
+)]
 struct Cli {}
 
 fn main() -> Result<()> {
