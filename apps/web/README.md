@@ -12,7 +12,7 @@ Run from the repo root with the local turbo:
 | `pnpm exec turbo run build --filter=web`     | Static export into `apps/web/out/`                                         |
 | `pnpm exec turbo run check --filter=web`     | `next typegen` then `tsc --noEmit` (route types and content types)         |
 | `pnpm exec turbo run lint test --filter=web` | ESLint and Vitest                                                          |
-| `pnpm exec turbo run format --filter=web`    | Prettier                                                                   |
+| `pnpm exec turbo run format --filter=web`    | Prettier (writes); `format:check` is the read-only variant CI runs         |
 | `pnpm exec turbo run generate --filter=web`  | Only the content build: `.content-collections/` and `public/concepts/*.md` |
 
 ## Configuration

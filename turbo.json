@@ -19,20 +19,14 @@
     "format": {
       "cache": false
     },
+    "format:check": {},
+    "//#format:check": {},
     "dev": {
       "persistent": true,
       "cache": false
     },
     "frontier-lexicon-rust#lint": {
-      "command": [
-        "cargo",
-        "clippy",
-        "--workspace",
-        "--locked",
-        "--",
-        "-D",
-        "warnings"
-      ]
+      "command": ["cargo", "lint"]
     },
     "web#generate": {
       "inputs": [
@@ -43,7 +37,7 @@
       "outputs": [".content-collections/**", "public/concepts/**"]
     },
     "web#build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "check"],
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"],
       "outputs": ["out/**"]
     },
