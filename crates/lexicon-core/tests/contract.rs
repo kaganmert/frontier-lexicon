@@ -40,12 +40,22 @@ fn slug_pattern_matches_the_web_side() {
 fn track_order_matches_the_web_side() {
     use lexicon_core::Track;
     let site = repo_file("apps/web/lib/site.ts");
-    let web_order = between(&site, "export const tracks = [", "]");
+    let web_order: Vec<_> = between(&site, "export const tracks = [", "]")
+        .split(',')
+        .map(|t| t.trim().trim_matches('"'))
+        .filter(|t| !t.is_empty())
+        .collect();
     let mut tracks = [Track::Coding, Track::Research, Track::Shared];
     tracks.sort_by_key(|t| t.rank());
     let rust_order: Vec<_> = tracks
         .iter()
-        .map(|t| serde_json::to_string(t).unwrap())
+        .map(|t| {
+            serde_json::to_value(t)
+                .unwrap()
+                .as_str()
+                .unwrap()
+                .to_owned()
+        })
         .collect();
-    assert_eq!(rust_order.join(", "), web_order);
+    assert_eq!(rust_order, web_order);
 }

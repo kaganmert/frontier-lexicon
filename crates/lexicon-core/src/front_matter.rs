@@ -11,6 +11,9 @@ pub(crate) struct Split<'a> {
 /// exactly `---`. LF and CRLF line endings are both accepted. Everything after
 /// the closing line is the body, untouched.
 pub(crate) fn split(text: &str) -> Result<Split<'_>, &'static str> {
+    if text.starts_with('\u{feff}') {
+        return Err("file starts with a byte order mark (BOM); save it as UTF-8 without BOM");
+    }
     let mut lines = text.split_inclusive('\n');
     let first = lines.next().unwrap_or("");
     if strip_line_ending(first) != "---" {
@@ -75,5 +78,11 @@ mod tests {
         assert!(split("---\na: 1\n----\n").is_err());
         assert!(split("---\n---\n").is_err());
         assert!(split("").is_err());
+    }
+
+    #[test]
+    fn names_a_byte_order_mark() {
+        let err = split("\u{feff}---\na: 1\n---\n").unwrap_err();
+        assert!(err.contains("byte order mark"), "{err}");
     }
 }

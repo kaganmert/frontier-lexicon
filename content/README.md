@@ -46,8 +46,14 @@ Unknown fields are errors, including inside `edges` and `sources` items.
 Optional lists may be left out, but not written as an empty key (`aliases:`
 with nothing after it); use `aliases: []` or drop the line.
 
-Character counts are Unicode characters. The site counts UTF-16 units, so a
-description full of emoji can pass here and still be rejected by the site.
+Text is non-empty only if it has something besides spaces. The 160-character
+limit counts UTF-16 units, as the site does: most characters count once, emoji
+and other characters outside the Basic Multilingual Plane count twice.
+
+A text field that YAML would read as a number or boolean (`title: 2024`,
+`question: yes`) must be quoted: `title: "2024"`. Source URLs must not contain
+spaces or line breaks, and files must be saved as UTF-8 without a byte order
+mark.
 
 Whether the slugs in `prerequisites` and `edges` exist, and the graph rules
 that span files, are checked separately.

@@ -95,15 +95,16 @@ pub fn load_concepts(dir: &Path) -> Result<Vec<Concept>, LoadError> {
         let entry = entry.map_err(LoadError::Io)?;
         let name = entry.file_name();
         if !name.as_encoded_bytes().starts_with(b".") {
-            entries.push(name);
+            let is_dir = entry.file_type().is_ok_and(|t| t.is_dir());
+            entries.push((name, is_dir));
         }
     }
     entries.sort();
 
     let mut concepts = Vec::new();
     let mut errors = Vec::new();
-    for name in entries {
-        match load_file(dir, name) {
+    for (name, is_dir) in entries {
+        match load_file(dir, name, is_dir) {
             Ok(concept) => concepts.push(concept),
             Err(mut file_errors) => errors.append(&mut file_errors),
         }
@@ -144,9 +145,9 @@ impl Problems {
         });
     }
 
-    /// Non-empty and free of line breaks.
+    /// Not blank (empty or only whitespace) and free of line breaks.
     fn single_line(&mut self, field: impl Into<String>, value: &str) {
-        if value.is_empty() {
+        if value.trim().is_empty() {
             self.field_error(field, "must not be empty");
         } else if value.contains(['\r', '\n']) {
             self.field_error(field, "must be a single line");
@@ -176,14 +177,14 @@ impl Problems {
     }
 }
 
-fn load_file(dir: &Path, name: OsString) -> Result<Concept, Vec<ContentError>> {
+fn load_file(dir: &Path, name: OsString, is_dir: bool) -> Result<Concept, Vec<ContentError>> {
     let path = dir.join(&name);
     let mut problems = Problems {
         path: path.clone(),
         errors: Vec::new(),
     };
 
-    if path.is_dir() {
+    if is_dir {
         problems.file_error(
             "subdirectories are not allowed; concept files sit directly in the concept directory",
         );
@@ -218,7 +219,11 @@ fn load_file(dir: &Path, name: OsString) -> Result<Concept, Vec<ContentError>> {
             return Err(problems.errors);
         }
     };
-    let fm: FrontMatter = match serde_saphyr::from_str(split.yaml) {
+    // `no_schema`: a string field written as a bare number or boolean
+    // (`title: 2024`) must be quoted. The site's YAML parser would read it as a
+    // number and reject it, so both sides agree.
+    let options = serde_saphyr::options! { no_schema: true };
+    let fm: FrontMatter = match serde_saphyr::from_str_with_options(split.yaml, options) {
         Ok(fm) => fm,
         Err(err) => {
             // The YAML starts on line 2 of the file, after the opening `---`.
@@ -264,11 +269,15 @@ fn check(p: &mut Problems, fm: &FrontMatter, file_slug: &str) {
         );
     }
     p.single_line("description", &fm.description);
-    let length = fm.description.chars().count();
+    // UTF-16 code units, the unit the site's `.max(160)` counts, so a
+    // description that passes here also passes the site build.
+    let length = fm.description.encode_utf16().count();
     if length > MAX_DESCRIPTION {
         p.field_error(
             "description",
-            format!("must be at most {MAX_DESCRIPTION} characters (got {length})"),
+            format!(
+                "must be at most {MAX_DESCRIPTION} characters, counted in UTF-16 units (got {length})"
+            ),
         );
     }
     if !(1..=10).contains(&fm.layer) {
@@ -312,6 +321,13 @@ fn check(p: &mut Problems, fm: &FrontMatter, file_slug: &str) {
 }
 
 fn check_url(raw: &str) -> Result<(), String> {
+    // The URL parser silently strips tabs and line breaks and trims spaces,
+    // but the raw string is what gets stored and linked.
+    if raw.chars().any(|c| c.is_whitespace() || c.is_control()) {
+        return Err(format!(
+            "{raw:?} must not contain spaces, tabs or line breaks"
+        ));
+    }
     match Url::parse(raw) {
         Ok(url) if matches!(url.scheme(), "http" | "https") => Ok(()),
         Ok(url) => Err(format!(

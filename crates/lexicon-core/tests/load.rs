@@ -124,7 +124,7 @@ const RULES: &[(&str, &str, Option<&str>, &str)] = &[
         "long-description",
         "token.mdx",
         Some("description"),
-        "at most 160 characters (got 161)",
+        "UTF-16 units (got 161)",
     ),
     ("layer-0", "token.mdx", Some("layer"), "between 1 and 10"),
     ("layer-11", "token.mdx", Some("layer"), "between 1 and 10"),
@@ -262,6 +262,32 @@ const RULES: &[(&str, &str, Option<&str>, &str)] = &[
         Some("sources[0].title"),
         "single line",
     ),
+    (
+        "blank-title",
+        "token.mdx",
+        Some("title"),
+        "must not be empty",
+    ),
+    ("unquoted-number-title", "token.mdx", None, "must be quoted"),
+    (
+        "long-description-utf16",
+        "token.mdx",
+        Some("description"),
+        "UTF-16 units (got 162)",
+    ),
+    ("byte-order-mark", "token.mdx", None, "byte order mark"),
+    (
+        "multi-line-source-url",
+        "token.mdx",
+        Some("sources[0].url"),
+        "line breaks",
+    ),
+    (
+        "spaced-source-url",
+        "token.mdx",
+        Some("sources[0].url"),
+        "spaces",
+    ),
 ];
 
 #[test]
@@ -342,10 +368,10 @@ fn accepts_crlf_line_endings() {
 }
 
 #[test]
-fn description_length_counts_unicode_scalars() {
-    // 160 two-byte characters: 320 bytes, but within the limit.
+fn description_length_counts_utf16_units() {
+    // 160 characters of two UTF-8 bytes but one UTF-16 unit each: within the limit.
     let concepts = load_concepts(&fixture("description-160")).unwrap();
-    assert_eq!(concepts[0].description.chars().count(), 160);
+    assert_eq!(concepts[0].description.encode_utf16().count(), 160);
 }
 
 #[test]

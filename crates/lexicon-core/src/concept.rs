@@ -18,7 +18,8 @@ pub struct Concept {
     /// Always the file stem; a `slug` in the front matter must equal it.
     pub slug: String,
     pub title: String,
-    /// At most 160 Unicode scalar values; used as the meta description.
+    /// At most 160 UTF-16 code units, as the site counts; used as the meta
+    /// description.
     pub description: String,
     /// 1–10.
     pub layer: u8,
