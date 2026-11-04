@@ -6,6 +6,7 @@ const valid = {
   description: "The maximum number of tokens a model can read in one request.",
   layer: 2,
   track: "shared",
+  status: "published",
 };
 
 describe("conceptFrontMatter", () => {
@@ -39,6 +40,18 @@ describe("conceptFrontMatter", () => {
     expect(
       conceptFrontMatter.safeParse({ ...valid, slug: "context-window" })
         .success,
+    ).toBe(true);
+  });
+
+  it("requires status to be draft or published", () => {
+    const withoutStatus: Partial<typeof valid> = { ...valid };
+    delete withoutStatus.status;
+    expect(conceptFrontMatter.safeParse(withoutStatus).success).toBe(false);
+    expect(
+      conceptFrontMatter.safeParse({ ...valid, status: "review" }).success,
+    ).toBe(false);
+    expect(
+      conceptFrontMatter.safeParse({ ...valid, status: "draft" }).success,
     ).toBe(true);
   });
 

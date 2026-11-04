@@ -1,4 +1,8 @@
-import { conceptEyebrow, getConcept, getConcepts } from "@/lib/concepts";
+import {
+  conceptEyebrow,
+  getConcept,
+  getPublishedConcepts,
+} from "@/lib/concepts";
 import { conceptOgName, ogImage, OG_INDEX, OG_SITE } from "@/lib/og";
 import { siteDescription, siteName } from "@/lib/site";
 
@@ -17,7 +21,7 @@ export function generateStaticParams() {
   const names = [
     OG_SITE,
     OG_INDEX,
-    ...getConcepts().map(({ slug }) => conceptOgName(slug)),
+    ...getPublishedConcepts().map(({ slug }) => conceptOgName(slug)),
   ];
   return names.map((name) => ({ name: `${name}.png`.split("/") }));
 }

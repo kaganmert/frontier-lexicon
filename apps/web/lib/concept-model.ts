@@ -1,5 +1,9 @@
 import { layerHeading, trackLabel, tracks, type Track } from "./site";
 
+/** `draft` concepts exist in the graph but never on the public site. */
+export const statuses = ["draft", "published"] as const;
+export type Status = (typeof statuses)[number];
+
 /** The subset of a concept document the SEO helpers and pages depend on. */
 export type ConceptSummary = {
   slug: string;
@@ -7,6 +11,7 @@ export type ConceptSummary = {
   description: string;
   layer: number;
   track: Track;
+  status: Status;
 };
 
 export type Concept = ConceptSummary & {
@@ -40,7 +45,11 @@ export function conceptEyebrow(
   return `${layerHeading(concept.layer)} · ${trackLabel[concept.track]}`;
 }
 
-/** Stable order: layer, then track (in `tracks` order), then title. */
+/**
+ * Canonical order: layer, then track (in `tracks` order), then slug by code
+ * unit. Slugs are ASCII, so this is the byte order `lexicon-core` sorts by
+ * and the site lists concepts in the same order as `graph.json`.
+ */
 export function sortConcepts<T extends ConceptSummary>(
   concepts: readonly T[],
 ): T[] {
@@ -48,8 +57,15 @@ export function sortConcepts<T extends ConceptSummary>(
     (a, b) =>
       a.layer - b.layer ||
       tracks.indexOf(a.track) - tracks.indexOf(b.track) ||
-      a.title.localeCompare(b.title, "en"),
+      (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0),
   );
+}
+
+/** The concepts the public site may show: drafts dropped, order kept. */
+export function publishedOnly<T extends ConceptSummary>(
+  concepts: readonly T[],
+): T[] {
+  return concepts.filter((concept) => concept.status === "published");
 }
 
 /** Concepts bucketed by layer, each bucket in `sortConcepts` order. */

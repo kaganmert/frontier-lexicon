@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { slugPattern } from "./concept-model";
+import { slugPattern, statuses } from "./concept-model";
 import { tracks } from "./site";
 
 const singleLine = z
@@ -26,6 +26,7 @@ export const conceptFrontMatter = z
     description: singleLine.max(160),
     layer: z.number().int().min(1).max(10),
     track: z.enum(tracks),
+    status: z.enum(statuses),
   })
   .passthrough();
 

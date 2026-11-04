@@ -52,6 +52,8 @@ Concept files live outside this package, in `content/concepts/<slug>.mdx` (CC BY
 
 The front matter contract (every field, the file naming and delimiting rules, an example) is documented once, in [`content/README.md`](../../content/README.md), and implemented in full by `crates/lexicon-core`. The site deliberately validates only the subset it needs to render a page (`lib/concept-schema.ts`): `title`, `description`, `layer`, `track` and the optional `slug`. Every other field passes through untouched.
 
+Only `status: published` concepts reach the public site. `lib/concepts.ts` drops drafts once, at load, and exports only `getPublishedConcepts()` and `getConcept(slug)`; the Markdown alternates in `content-collections.ts` use the same filter. So no draft page, `.md` file, OG image, sitemap entry, `llms.txt` or `llms-full.txt` line, and no draft `description` or `question`, ever lands in `out/`. The concept map (FLN-09) reads `graph.json` instead and may show draft titles.
+
 Bodies start at H2; the page renders the title as the only H1. Files sit directly in `content/concepts/` and are named `<slug>.mdx` with a lowercase kebab-case slug; subdirectories and other file names fail the build. Invalid front matter fails the build with the file name.
 
 With an empty `content/concepts/` the build still succeeds: the home page, `/concepts/`, `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt` and the site OG image are all produced, with explicit empty states.
@@ -84,4 +86,6 @@ Pure helpers behind these live in `lib/seo/` (JSON-LD builders, `llms.txt` gener
 - **No third-party requests.** System font stack, no analytics, no external scripts. The only external links are plain anchors.
 - **`robots.txt`** allows everyone and lists the AI crawlers by their documented tokens: `GPTBot`, `OAI-SearchBot`, `ClaudeBot`, `Claude-SearchBot`, `Google-Extended`, `PerplexityBot`, `CCBot`.
 - **`llms.txt`** follows [llmstxt.org](https://llmstxt.org/). No major AI vendor commits to reading it; it costs nothing and the real wins are clean HTML, the sitemap, the robots rules and the per-page Markdown.
+- **Drafts are invisible to the public site.** The graph is seeded as `status: draft` front matter long before any lesson text exists, and the site is live. Filtering once in `lib/concepts.ts`, instead of at each call site, means a new page or route cannot forget it; there is no unfiltered accessor to reach for.
+- **Concept order is (layer, track, slug).** Slugs compare by code unit, the same byte order `lexicon-core` uses, so the site and `graph.json` list concepts identically. Titles are not used: `localeCompare` depends on the runtime's ICU data.
 - **JSON-LD** uses schema.org `WebSite`, `DefinedTermSet`, `DefinedTerm` and `BreadcrumbList`. Google shows no rich result for defined terms; the markup is there for semantic clarity, not traffic.
