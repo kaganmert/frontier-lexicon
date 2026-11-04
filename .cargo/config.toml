@@ -1,0 +1,4 @@
+# `cargo lint` is the single definition of the clippy invocation used by
+# turbo (`frontier-lexicon-rust#lint`), CI and the README.
+[alias]
+lint = "clippy --workspace --all-targets --locked -- -D warnings"

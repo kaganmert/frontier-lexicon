@@ -8,10 +8,11 @@ on:
 permissions:
   contents: read
 
-# Superseded PR pushes cancel the older run; pushes to main always finish so
-# every main commit ends with a completed status.
+# A newer push to the same PR cancels the older run. Pushes to main get a
+# group of their own per commit: GitHub also cancels *queued* runs in a shared
+# group, so a shared main group would leave a merged commit without a status.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -20,35 +21,52 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       # Reads the pnpm version from `packageManager` in package.json.
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
+      # Node version comes from `engines.node`, pnpm store from the lockfile.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: package.json
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
 
-      # `format` writes, `format:check` only checks.
-      - run: pnpm exec turbo run check lint test build format:check --filter=web
+      # Turbo task cache and Next's build cache, restored from the latest
+      # run on any branch when there is no exact match.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .turbo/cache
+            apps/web/.next/cache
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+
+      # `web#build` depends on `check`, which depends on `generate`, so the
+      # three tasks that regenerate the content never run concurrently.
+      # `//#format:check` covers the root files, `web#format:check` the package.
+      - run: pnpm exec turbo run check lint test build format:check --filter=web --filter=//
 
   rust:
     name: rust
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
-          toolchain: stable
-          components: clippy, rustfmt
+          persist-credentials: false
+
+      # The runner ships rustup; this installs the channel and components
+      # pinned in rust-toolchain.toml.
+      - run: rustup toolchain install
 
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
 
       - run: cargo fmt --all --check
 
-      - run: cargo clippy --workspace --locked -- -D warnings
+      # Alias defined in .cargo/config.toml; same command as `turbo run lint`.
+      - run: cargo lint
 
       - run: cargo test --workspace --locked

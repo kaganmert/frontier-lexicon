@@ -1,0 +1,7 @@
+# Packages check their own formatting (apps/web has `format:check`).
+apps/
+packages/
+crates/
+target/
+pnpm-lock.yaml
+Cargo.lock

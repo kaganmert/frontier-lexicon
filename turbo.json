@@ -6,42 +6,29 @@
   },
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
     },
     "check": {
-      "dependsOn": [
-        "^check"
-      ]
+      "dependsOn": ["^check"]
     },
     "test": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "lint": {},
     "format": {
       "cache": false
     },
     "format:check": {},
+    "//#format:check": {
+      "inputs": ["*.json", "*.md", "*.yaml", ".github/**", ".prettierignore"]
+    },
     "dev": {
       "persistent": true,
       "cache": false
     },
     "frontier-lexicon-rust#lint": {
-      "command": [
-        "cargo",
-        "clippy",
-        "--workspace",
-        "--locked",
-        "--",
-        "-D",
-        "warnings"
-      ]
+      "command": ["cargo", "lint"]
     },
     "web#generate": {
       "inputs": [
@@ -49,27 +36,15 @@
         "lib/**",
         "$TURBO_ROOT$/content/concepts/**"
       ],
-      "outputs": [
-        ".content-collections/**",
-        "public/concepts/**"
-      ]
+      "outputs": [".content-collections/**", "public/concepts/**"]
     },
     "web#build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "$TURBO_ROOT$/content/concepts/**"
-      ],
-      "outputs": [
-        "out/**"
-      ]
+      "dependsOn": ["^build", "check"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"],
+      "outputs": ["out/**"]
     },
     "web#check": {
-      "dependsOn": [
-        "generate"
-      ]
+      "dependsOn": ["generate"]
     }
   }
 }

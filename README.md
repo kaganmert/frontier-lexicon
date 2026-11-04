@@ -24,15 +24,15 @@ Reproduce locally from the repo root:
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm exec turbo run check lint test build format:check --filter=web
+pnpm exec turbo run check lint test build format:check --filter=web --filter=//
 cargo fmt --all --check
-cargo clippy --workspace --locked -- -D warnings
+cargo lint   # alias for clippy, see .cargo/config.toml
 cargo test --workspace --locked
 ```
 
-The Rust job uses the current stable toolchain, so a new stable release can
-introduce clippy lints that turn `main` red without a code change. Fix the
-lint rather than pinning the toolchain.
+The Rust toolchain is pinned in `rust-toolchain.toml` (rustup picks it up
+locally and in CI). Bump it in its own PR so a new clippy lint never lands in
+the middle of unrelated work.
 
 ## Licensing
 

@@ -1,0 +1,6 @@
+# Pinned so a new stable release cannot turn every PR red through new clippy
+# lints. Bump deliberately, in its own PR.
+[toolchain]
+channel = "1.99.1"
+components = ["clippy", "rustfmt"]
+profile = "minimal"
