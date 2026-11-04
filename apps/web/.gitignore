@@ -1,0 +1,6 @@
+.next/
+out/
+.content-collections/
+next-env.d.ts
+*.tsbuildinfo
+public/concepts/
