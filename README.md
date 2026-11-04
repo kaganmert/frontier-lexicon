@@ -20,7 +20,9 @@ Click a node for the theory, a hands-on exercise, and the concepts you need firs
 
 Every pull request and every push to `main` runs the `CI` workflow
 (`.github/workflows/ci.yml`). Its two jobs, `web` and `rust`, are required
-status checks on `main`: a red job blocks the merge.
+status checks on `main`: a red job blocks the merge. Pull requests also get a
+Vercel preview deployment with its own status check; it is informative, not
+required.
 
 Reproduce locally from the repo root:
 
