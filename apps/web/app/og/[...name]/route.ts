@@ -1,6 +1,6 @@
-import { getConcept, getConcepts } from "@/lib/concepts";
+import { conceptEyebrow, getConcept, getConcepts } from "@/lib/concepts";
 import { ogImage, OG_INDEX, OG_SITE } from "@/lib/og";
-import { layerName, siteDescription, siteName, trackLabel } from "@/lib/site";
+import { siteDescription, siteName } from "@/lib/site";
 
 /**
  * OpenGraph images, one PNG per page, rendered at build time:
@@ -40,7 +40,7 @@ export async function GET(
   const concept = getConcept(key);
   if (!concept) return new Response("Not found", { status: 404 });
   return ogImage({
-    eyebrow: `Layer ${concept.layer}: ${layerName(concept.layer)} · ${trackLabel[concept.track]}`,
+    eyebrow: conceptEyebrow(concept),
     title: concept.title,
     subtitle: concept.description,
   });

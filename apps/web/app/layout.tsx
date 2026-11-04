@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/json-ld";
+import { conceptsIndexPath } from "@/lib/concept-model";
+import { websiteJsonLd } from "@/lib/seo/jsonld";
 import { OG_SITE, ogImageMeta } from "@/lib/og";
 import { siteDescription, siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
@@ -32,6 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
+        <JsonLd data={websiteJsonLd()} />
         <header className="border-b border-border">
           <nav
             aria-label="Primary"
@@ -42,7 +46,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
             <ul className="flex gap-4 text-sm">
               <li>
-                <Link href="/concepts/">Concepts</Link>
+                <Link href={conceptsIndexPath}>Concepts</Link>
               </li>
               <li>
                 <a href="/llms.txt">llms.txt</a>

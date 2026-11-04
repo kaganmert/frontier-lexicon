@@ -36,7 +36,7 @@ slug: context-window # optional; must equal the file name if present
 ---
 ```
 
-Any other field (`question`, `prerequisites`, `edges`, `sources`, `provenance`) passes through untouched. Bodies start at H2; the page renders the title as the only H1. Invalid front matter fails the build with the file name.
+Any other field (`question`, `prerequisites`, `edges`, `sources`, `provenance`) passes through untouched. Bodies start at H2; the page renders the title as the only H1. Invalid front matter fails the build with the file name. The slugs `site` and `concepts` are reserved (they name the site-level OpenGraph images).
 
 With an empty `content/concepts/` the build still succeeds: the home page, `/concepts/`, `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt` and the site OG image are all produced, with explicit empty states.
 
@@ -63,6 +63,7 @@ Pure helpers behind these live in `lib/seo/` (JSON-LD builders, `llms.txt` gener
 - **Markdown alternates are files in `public/`, not a route.** Static export refuses a dynamic route whose `generateStaticParams` is empty, which is the case before the first concept exists. The `onSuccess` hook in `content-collections.ts` writes `public/concepts/<slug>/index.md` (cleaned on every build, git-ignored) and Next copies `public/` into `out/`. The page advertises it with `<link rel="alternate" type="text/markdown">`. A dotted dynamic segment (`/concepts/<slug>.md`) is not expressible in the App Router, so the documented fallback path is the one shipped.
 - **One optional catch-all for the concept routes.** `/concepts/` and `/concepts/<slug>/` share `app/concepts/[[...slug]]/page.tsx` so there is always at least one static param.
 - **OpenGraph images through one route handler.** Next does not allow the `opengraph-image.tsx` convention below an optional catch-all, so `/og/<name>.png` renders all cards with `next/og` at build time. Pages reference them explicitly in `openGraph.images`.
+- **The Markdown alternate is the raw MDX body.** With no components registered this is plain Markdown. Once bodies start using `import` or JSX, the writer in `content-collections.ts` must strip or render those before the `.md` and `llms-full.txt` outputs are still plain.
 - **No third-party requests.** System font stack, no analytics, no external scripts. The only external links are plain anchors.
 - **`robots.txt`** allows everyone and lists the AI crawlers by their documented tokens: `GPTBot`, `OAI-SearchBot`, `ClaudeBot`, `Claude-SearchBot`, `Google-Extended`, `PerplexityBot`, `CCBot`.
 - **`llms.txt`** follows [llmstxt.org](https://llmstxt.org/). No major AI vendor commits to reading it; it costs nothing and the real wins are clean HTML, the sitemap, the robots rules and the per-page Markdown.

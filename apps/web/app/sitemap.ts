@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { conceptPath, getConcepts } from "@/lib/concepts";
+import { conceptPath, conceptsIndexPath, getConcepts } from "@/lib/concepts";
 import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -8,7 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: absoluteUrl("/"), changeFrequency: "weekly", priority: 1 },
     {
-      url: absoluteUrl("/concepts/"),
+      url: absoluteUrl(conceptsIndexPath),
       changeFrequency: "weekly",
       priority: 0.9,
     },

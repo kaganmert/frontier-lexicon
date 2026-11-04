@@ -16,19 +16,19 @@ export const siteDescription =
   "An interactive, layered map of modern AI concepts, from tokens to alignment research. Each concept has a plain-language theory, a hands-on exercise and the concepts you need first.";
 
 /** Turn a site-relative path (`/concepts/token/`) into an absolute URL. */
-export function absoluteUrl(path: string, base: string = siteUrl): string {
-  const cleanBase = base.replace(/\/+$/, "");
-  if (path === "" || path === "/") return `${cleanBase}/`;
-  return `${cleanBase}${path.startsWith("/") ? path : `/${path}`}`;
+export function absoluteUrl(path: string): string {
+  if (path === "" || path === "/") return `${siteUrl}/`;
+  return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-export const tracks = ["coding", "research", "shared"] as const;
+/** Display order of the tracks; the single source for the enum everywhere. */
+export const tracks = ["shared", "coding", "research"] as const;
 export type Track = (typeof tracks)[number];
 
 export const trackLabel: Record<Track, string> = {
+  shared: "Shared",
   coding: "Coding",
   research: "Research",
-  shared: "Shared",
 };
 
 export const layerNames: Record<number, string> = {
@@ -46,4 +46,9 @@ export const layerNames: Record<number, string> = {
 
 export function layerName(layer: number): string {
   return layerNames[layer] ?? `Layer ${layer}`;
+}
+
+/** `Layer 2: Context, requests and cost` */
+export function layerHeading(layer: number): string {
+  return `Layer ${layer}: ${layerName(layer)}`;
 }

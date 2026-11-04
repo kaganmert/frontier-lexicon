@@ -2,7 +2,6 @@ import { ImageResponse } from "next/og";
 import { siteName } from "./site";
 
 export const ogSize = { width: 1200, height: 630 };
-export const ogContentType = "image/png";
 
 export const OG_SITE = "site";
 export const OG_INDEX = "concepts";

@@ -1,14 +1,11 @@
 import Link from "next/link";
-import { JsonLd } from "@/components/json-ld";
-import { getConcepts } from "@/lib/concepts";
-import { websiteJsonLd } from "@/lib/seo/jsonld";
+import { conceptsIndexPath, getConcepts } from "@/lib/concepts";
 import { siteDescription, siteName } from "@/lib/site";
 
 export default function HomePage() {
   const concepts = getConcepts();
   return (
     <>
-      <JsonLd data={websiteJsonLd()} />
       <h1 className="text-3xl font-semibold tracking-tight">{siteName}</h1>
       <p className="mt-4 text-lg">{siteDescription}</p>
       <section className="mt-8 space-y-3">
@@ -33,7 +30,7 @@ export default function HomePage() {
           </p>
         ) : (
           <p>
-            <Link href="/concepts/" className="text-accent underline">
+            <Link href={conceptsIndexPath} className="text-accent underline">
               Browse all {concepts.length} concepts
             </Link>
           </p>

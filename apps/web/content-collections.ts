@@ -3,7 +3,12 @@ import { compileMDX } from "@content-collections/mdx";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
-import { conceptMarkdownPath, type Concept } from "./lib/concept-model";
+import {
+  conceptMarkdownPath,
+  reservedSlugs,
+  type Concept,
+} from "./lib/concept-model";
+import { tracks } from "./lib/site";
 import { conceptToMarkdown } from "./lib/seo/markdown";
 
 /**
@@ -22,7 +27,7 @@ export const conceptFrontMatter = z
       .optional(),
     description: z.string().min(1).max(160),
     layer: z.number().int().min(1).max(10),
-    track: z.enum(["coding", "research", "shared"]),
+    track: z.enum(tracks),
   })
   .passthrough();
 
@@ -33,6 +38,11 @@ const concepts = defineCollection({
   schema: conceptFrontMatter,
   transform: async (doc, context) => {
     const slug = doc._meta.path;
+    if ((reservedSlugs as readonly string[]).includes(slug)) {
+      throw new Error(
+        `${doc._meta.filePath}: "${slug}" is a reserved slug (${reservedSlugs.join(", ")})`,
+      );
+    }
     if (doc.slug !== undefined && doc.slug !== slug) {
       throw new Error(
         `${doc._meta.filePath}: front matter slug "${doc.slug}" does not match file name "${slug}"`,

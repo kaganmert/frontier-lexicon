@@ -1,16 +1,20 @@
-import { conceptPath, type ConceptSummary } from "../concept-model";
+import {
+  conceptPath,
+  conceptsIndexPath,
+  type ConceptSummary,
+} from "../concept-model";
 import { absoluteUrl, siteDescription, siteName } from "../site";
 
 const SCHEMA = "https://schema.org";
 
-const termSetId = () => `${absoluteUrl("/concepts/")}#set`;
+const termSetId = () => `${absoluteUrl(conceptsIndexPath)}#set`;
 
 function termSet() {
   return {
     "@type": "DefinedTermSet",
     "@id": termSetId(),
     name: `${siteName} concepts`,
-    url: absoluteUrl("/concepts/"),
+    url: absoluteUrl(conceptsIndexPath),
   };
 }
 
@@ -50,7 +54,7 @@ export function definedTermSetJsonLd(concepts: readonly ConceptSummary[]) {
 export function breadcrumbJsonLd(concept: ConceptSummary) {
   const trail = [
     { name: "Home", item: absoluteUrl("/") },
-    { name: "Concepts", item: absoluteUrl("/concepts/") },
+    { name: "Concepts", item: absoluteUrl(conceptsIndexPath) },
     { name: concept.title, item: absoluteUrl(conceptPath(concept.slug)) },
   ];
   return {

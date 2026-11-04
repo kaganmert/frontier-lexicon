@@ -6,22 +6,14 @@
   },
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
     },
     "check": {
-      "dependsOn": [
-        "^check"
-      ]
+      "dependsOn": ["^check"]
     },
     "test": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "lint": {},
     "format": {
@@ -45,32 +37,18 @@
     "web#generate": {
       "inputs": [
         "content-collections.ts",
-        "lib/concept-model.ts",
-        "lib/seo/markdown.ts",
-        "lib/site.ts",
+        "lib/**",
         "$TURBO_ROOT$/content/concepts/**"
       ],
-      "outputs": [
-        ".content-collections/**",
-        "public/concepts/**"
-      ]
+      "outputs": [".content-collections/**", "public/concepts/**"]
     },
     "web#build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "$TURBO_ROOT$/content/concepts/**"
-      ],
-      "outputs": [
-        "out/**"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"],
+      "outputs": ["out/**"]
     },
     "web#check": {
-      "dependsOn": [
-        "generate"
-      ]
+      "dependsOn": ["generate"]
     }
   }
 }
