@@ -23,14 +23,18 @@
 
 mod concept;
 mod front_matter;
+mod graph;
 mod load;
 mod slug;
+mod validate;
 
 use serde::{Deserialize, Serialize};
 
 pub use concept::{Concept, Edge, Provenance, Source, Status};
+pub use graph::{GraphError, validate_graph};
 pub use load::{ContentError, LoadError, load_concepts};
 pub use slug::is_valid_slug;
+pub use validate::{ValidationError, validate_dir};
 
 /// Which audience a concept belongs to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -57,7 +61,7 @@ impl Track {
 }
 
 /// Typed, directional relation between two concepts.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum EdgeType {
     PrerequisiteOf,
@@ -65,6 +69,19 @@ pub enum EdgeType {
     Mitigates,
     Causes,
     RelatedTo,
+}
+
+impl EdgeType {
+    /// The name used in front matter and `graph.json`, such as `RELATED_TO`.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            EdgeType::PrerequisiteOf => "PREREQUISITE_OF",
+            EdgeType::Measures => "MEASURES",
+            EdgeType::Mitigates => "MITIGATES",
+            EdgeType::Causes => "CAUSES",
+            EdgeType::RelatedTo => "RELATED_TO",
+        }
+    }
 }
 
 #[cfg(test)]
@@ -75,6 +92,19 @@ mod tests {
     fn edge_type_serialises_as_screaming_snake_case() {
         let json = serde_json::to_string(&EdgeType::PrerequisiteOf).unwrap();
         assert_eq!(json, "\"PREREQUISITE_OF\"");
+    }
+
+    #[test]
+    fn edge_type_name_matches_serde() {
+        for kind in [
+            EdgeType::PrerequisiteOf,
+            EdgeType::Measures,
+            EdgeType::Mitigates,
+            EdgeType::Causes,
+            EdgeType::RelatedTo,
+        ] {
+            assert_eq!(serde_json::to_value(kind).unwrap(), kind.as_str());
+        }
     }
 
     #[test]
