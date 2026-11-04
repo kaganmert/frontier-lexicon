@@ -18,7 +18,11 @@ export type Concept = ConceptSummary & {
 
 export const conceptsIndexPath = "/concepts/";
 
-/** Lowercase kebab-case: the only shape a slug (and so a file name) may take. */
+/**
+ * Lowercase kebab-case: the only shape a slug (and so a file name) may take.
+ * Must stay literally identical to the pattern quoted on `is_valid_slug` in
+ * `crates/lexicon-core/src/slug.rs`.
+ */
 export const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export function conceptPath(slug: string): string {

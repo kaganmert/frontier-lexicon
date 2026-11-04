@@ -8,11 +8,10 @@ const singleLine = z
   .refine((value) => !/[\r\n]/.test(value), "must be a single line");
 
 /**
- * Minimal front matter contract for a concept file. Only what the site needs
- * to render and describe a page is validated here; the full schema (question,
- * prerequisites, typed edges, sources, provenance) is fixed later together
- * with the Rust engine in `crates/lexicon-core`, and those fields pass through
- * untouched until then.
+ * The subset of the concept front matter the site needs to render and
+ * describe a page. The full contract is documented in `content/README.md` and
+ * enforced by `crates/lexicon-core`; every other field passes through
+ * untouched here.
  *
  * `title` and `description` are single lines because they are emitted into
  * Markdown link text, a blockquote and `<meta>` attributes verbatim.
