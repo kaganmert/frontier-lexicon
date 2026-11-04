@@ -24,7 +24,31 @@
       "cache": false
     },
     "frontier-lexicon-rust#lint": {
-      "command": ["cargo", "clippy", "--workspace", "--locked", "--", "-D", "warnings"]
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ]
+    },
+    "web#generate": {
+      "inputs": [
+        "content-collections.ts",
+        "lib/**",
+        "$TURBO_ROOT$/content/concepts/**"
+      ],
+      "outputs": [".content-collections/**", "public/concepts/**"]
+    },
+    "web#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"],
+      "outputs": ["out/**"]
+    },
+    "web#check": {
+      "dependsOn": ["generate"]
     }
   }
 }
