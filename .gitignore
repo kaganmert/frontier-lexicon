@@ -6,5 +6,6 @@ dist/
 .DS_Store
 target/
 .turbo/
+.vercel/
 docs/
 AGENTS.md

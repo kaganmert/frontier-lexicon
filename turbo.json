@@ -1,5 +1,6 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
+  "globalPassThroughEnv": ["ENABLE_EXPERIMENTAL_COREPACK"],
   "futureFlags": {
     "experimentalCargoWorkspaces": true,
     "experimentalTaskCommand": true
@@ -39,7 +40,7 @@
     "web#build": {
       "dependsOn": ["^build", "check"],
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"],
-      "outputs": ["out/**"]
+      "outputs": ["out/**", ".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
     "web#check": {
       "dependsOn": ["generate"]
