@@ -42,6 +42,10 @@ struct Link<'a> {
 ///    (same-layer prerequisites are allowed);
 /// 5. the `PREREQUISITE_OF` subgraph has no cycles.
 ///
+/// Errors come in rule order; within a rule, in the order of `concepts`,
+/// except cycles, which are sorted by their path so the result does not
+/// depend on the input order.
+///
 /// An entry failing rule 1 or 2 is reported once and left out of rules 3–5.
 /// Every repeat of an edge is reported, and only the first counts for rules
 /// 4 and 5. Rule 5 reports one cycle per strongly connected component, even

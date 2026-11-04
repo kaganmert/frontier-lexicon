@@ -93,10 +93,15 @@ cargo run -p lexicon --locked -- validate --content <dir>    # any other directo
 Exit codes:
 
 - `0`: everything passes; prints `validated <n> concepts, <e> edges`.
-- `1`: content or graph problems; each is printed on its own line as
-  `<file>: <message>`, sorted.
+- `1`: content or graph problems, each on its own line as
+  `<file>: <message>`. File problems come in file-name order and, within a
+  file, in front matter order; graph problems are sorted by file.
 - `2`: the directory is missing or unreadable, or, without `--content`, no
-  `Cargo.lock` was found in the current directory or above it.
+  directory holding both `Cargo.lock` and `content/concepts` was found at or
+  above the current one.
+
+Without `--content`, file paths are printed relative to the current
+directory (`content/concepts/<file>` from the repository root).
 
 CI runs it on every pull request.
 

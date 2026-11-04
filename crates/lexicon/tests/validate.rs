@@ -98,6 +98,21 @@ fn errors_are_sorted() {
 }
 
 #[test]
+fn content_errors_keep_the_loader_order() {
+    let run = validate_fixture("content-order");
+    assert_eq!(run.code, Some(1));
+    let fields: Vec<_> = run
+        .stderr_lines
+        .iter()
+        .map(|line| line.split(": ").nth(1).unwrap())
+        .collect();
+    assert_eq!(
+        fields,
+        ["title", "description", "aliases[2]", "aliases[10]"]
+    );
+}
+
+#[test]
 fn schema_errors_suppress_graph_checks() {
     let run = validate_fixture("schema-error");
     assert_eq!(run.code, Some(1));
@@ -136,9 +151,58 @@ fn finds_content_from_any_directory_below_the_cargo_lock() {
 }
 
 #[test]
+fn default_paths_are_relative_to_the_current_directory() {
+    let tmp = TempDir::new("lexicon-relative");
+    let root = &tmp.0;
+    std::fs::create_dir_all(root.join("content/concepts")).unwrap();
+    std::fs::create_dir_all(root.join("apps/web")).unwrap();
+    std::fs::write(root.join("Cargo.lock"), "").unwrap();
+    std::fs::copy(
+        fixture("schema-error").join("token.mdx"),
+        root.join("content/concepts/token.mdx"),
+    )
+    .unwrap();
+
+    let from_root = validate(&[], Some(root));
+    assert_eq!(
+        from_root.stderr_lines,
+        ["content/concepts/token.mdx: layer: must be between 1 and 10 (got 0)"]
+    );
+    let from_below = validate(&[], Some(&root.join("apps/web")));
+    assert!(
+        from_below.stderr_lines[0].starts_with("../../content/concepts/token.mdx: "),
+        "{:?}",
+        from_below.stderr_lines
+    );
+}
+
+#[test]
+fn skips_a_cargo_lock_without_content() {
+    // A nested crate (vendored, packaged, an addon) has its own Cargo.lock
+    // but no content/concepts; the repo root above it is the one meant.
+    let tmp = TempDir::new("lexicon-nested-lock");
+    let root = &tmp.0;
+    let vendored = root.join("node_modules/addon");
+    std::fs::create_dir_all(&vendored).unwrap();
+    std::fs::write(vendored.join("Cargo.lock"), "").unwrap();
+    std::fs::create_dir_all(root.join("content/concepts")).unwrap();
+    std::fs::write(root.join("Cargo.lock"), "").unwrap();
+
+    let run = validate(&[], Some(&vendored));
+    assert_eq!(run.code, Some(0), "{:?}", run.stderr_lines);
+}
+
+#[test]
 fn without_a_cargo_lock_above_it_exits_2() {
-    // Assumes no ancestor of the system temp directory holds a Cargo.lock.
     let tmp = TempDir::new("lexicon-no-lock");
+    let repo_above = tmp
+        .0
+        .ancestors()
+        .any(|dir| dir.join("Cargo.lock").is_file() && dir.join("content/concepts").is_dir());
+    if repo_above {
+        eprintln!("skipped: the temp directory sits inside a lexicon checkout");
+        return;
+    }
     let run = validate(&[], Some(&tmp.0));
     assert_eq!(run.code, Some(2));
     assert!(

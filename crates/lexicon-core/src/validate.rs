@@ -2,15 +2,19 @@
 //! what `lexicon build` is to run before writing `graph.json`.
 
 use std::fmt;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
+use crate::load::io_message;
 use crate::{Concept, ContentError, GraphError, LoadError, load_concepts, validate_graph};
 
 /// Why [`validate_dir`] failed.
 #[derive(Debug)]
 pub enum ValidationError {
     /// The concept directory could not be listed.
-    Io(std::io::Error),
+    Io {
+        dir: PathBuf,
+        source: std::io::Error,
+    },
     /// Problems in individual files; graph checks did not run.
     Content(Vec<ContentError>),
     /// Every file is fine on its own, but the graph breaks a rule.
@@ -20,7 +24,7 @@ pub enum ValidationError {
 impl From<LoadError> for ValidationError {
     fn from(err: LoadError) -> Self {
         match err {
-            LoadError::Io(err) => ValidationError::Io(err),
+            LoadError::Io { dir, source } => ValidationError::Io { dir, source },
             LoadError::Content(errors) => ValidationError::Content(errors),
         }
     }
@@ -30,7 +34,7 @@ impl ValidationError {
     /// One line per problem, as `<path>: [<field>: ]<message>`.
     pub fn lines(&self) -> Vec<String> {
         match self {
-            ValidationError::Io(err) => vec![format!("cannot list the concept directory: {err}")],
+            ValidationError::Io { dir, source } => vec![io_message(dir, source)],
             ValidationError::Content(errors) => errors.iter().map(ToString::to_string).collect(),
             ValidationError::Graph(errors) => errors.iter().map(ToString::to_string).collect(),
         }
@@ -46,7 +50,7 @@ impl fmt::Display for ValidationError {
 impl std::error::Error for ValidationError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            ValidationError::Io(err) => Some(err),
+            ValidationError::Io { source, .. } => Some(source),
             _ => None,
         }
     }

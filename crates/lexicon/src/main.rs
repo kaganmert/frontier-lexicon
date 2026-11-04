@@ -45,7 +45,7 @@ fn main() -> Result<()> {
                     let edges: usize = concepts.iter().map(|c| c.edge_count()).sum();
                     println!("validated {} concepts, {edges} edges", concepts.len());
                 }
-                Err(err) => fail(&dir, &err),
+                Err(err) => fail(&err),
             }
         }
         Command::Build => println!("build: not implemented yet"),
@@ -53,36 +53,48 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-/// Prints every problem to stderr, sorted, one per line, and exits with the
-/// matching code.
-fn fail(dir: &Path, err: &ValidationError) -> ! {
-    if let ValidationError::Io(_) = err {
-        eprintln!("{}: {err}", dir.display());
-        exit(EXIT_IO);
-    }
+/// Prints every problem to stderr, one per line, and exits with the matching
+/// code. Content errors keep the loader's order (file name, then field order);
+/// graph errors are sorted so each file's problems sit together.
+fn fail(err: &ValidationError) -> ! {
     let mut lines = err.lines();
-    lines.sort();
+    if let ValidationError::Graph(_) = err {
+        lines.sort();
+    }
     for line in lines {
         eprintln!("{line}");
     }
-    exit(EXIT_INVALID);
+    exit(match err {
+        ValidationError::Io { .. } => EXIT_IO,
+        _ => EXIT_INVALID,
+    });
 }
 
-/// `content/concepts` under the nearest ancestor of the current directory
-/// that holds `Cargo.lock`, so the command works from anywhere in the repo.
+/// `content/concepts` of the repository the current directory is in: the
+/// nearest ancestor holding both `Cargo.lock` and `content/concepts` (a
+/// nested crate's own `Cargo.lock` is skipped). Returned relative to the
+/// current directory, so error lines read `content/concepts/<file>: …` from
+/// the repo root.
 fn default_content_dir() -> PathBuf {
     let cwd = std::env::current_dir().unwrap_or_else(|err| {
         eprintln!("cannot read the current directory: {err}");
         exit(EXIT_IO);
     });
-    match cwd.ancestors().find(|dir| dir.join("Cargo.lock").is_file()) {
-        Some(root) => root.join("content/concepts"),
-        None => {
-            eprintln!(
-                "no Cargo.lock in {} or any parent; run inside the repository or pass --content <dir>",
-                cwd.display()
-            );
-            exit(EXIT_IO);
-        }
-    }
+    let content = Path::new("content/concepts");
+    let Some(root) = cwd
+        .ancestors()
+        .find(|dir| dir.join("Cargo.lock").is_file() && dir.join(content).is_dir())
+    else {
+        eprintln!(
+            "no directory holding Cargo.lock and content/concepts in {} or above; run inside the repository or pass --content <dir>",
+            cwd.display()
+        );
+        exit(EXIT_IO);
+    };
+    let depth = cwd
+        .strip_prefix(root)
+        .map_or(0, |below| below.components().count());
+    let mut dir: PathBuf = std::iter::repeat_n("..", depth).collect();
+    dir.push(content);
+    dir
 }

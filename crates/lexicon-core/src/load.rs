@@ -17,7 +17,10 @@ const MAX_DESCRIPTION: usize = 160;
 #[derive(Debug)]
 pub enum LoadError {
     /// The directory itself could not be listed (missing or unreadable).
-    Io(std::io::Error),
+    Io {
+        dir: PathBuf,
+        source: std::io::Error,
+    },
     /// Every problem found in every file, in file-name order.
     Content(Vec<ContentError>),
 }
@@ -25,7 +28,7 @@ pub enum LoadError {
 impl fmt::Display for LoadError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            LoadError::Io(err) => write!(f, "cannot list the concept directory: {err}"),
+            LoadError::Io { dir, source } => write!(f, "{}", io_message(dir, source)),
             LoadError::Content(errors) => {
                 let mut lines = errors.iter();
                 if let Some(first) = lines.next() {
@@ -43,10 +46,18 @@ impl fmt::Display for LoadError {
 impl std::error::Error for LoadError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            LoadError::Io(err) => Some(err),
+            LoadError::Io { source, .. } => Some(source),
             LoadError::Content(_) => None,
         }
     }
+}
+
+/// The line for a concept directory that cannot be listed.
+pub(crate) fn io_message(dir: &Path, source: &std::io::Error) -> String {
+    format!(
+        "{}: cannot list the concept directory: {source}",
+        dir.display()
+    )
 }
 
 /// One problem in one concept file.
@@ -91,8 +102,12 @@ impl std::error::Error for ContentError {}
 /// ```
 pub fn load_concepts(dir: &Path) -> Result<Vec<Concept>, LoadError> {
     let mut entries = Vec::new();
-    for entry in std::fs::read_dir(dir).map_err(LoadError::Io)? {
-        let entry = entry.map_err(LoadError::Io)?;
+    let io = |source| LoadError::Io {
+        dir: dir.to_owned(),
+        source,
+    };
+    for entry in std::fs::read_dir(dir).map_err(io)? {
+        let entry = entry.map_err(io)?;
         let name = entry.file_name();
         if !name.as_encoded_bytes().starts_with(b".") {
             let is_dir = entry.file_type().is_ok_and(|t| t.is_dir());
