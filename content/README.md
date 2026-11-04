@@ -105,6 +105,33 @@ directory (`content/concepts/<file>` from the repository root).
 
 CI runs it on every pull request.
 
+## Provenance
+
+`provenance` records where a concept came from:
+
+- `seed`: the term name was taken from the
+  [Dictionary of AI Coding](https://github.com/mattpocock/dictionary-of-ai-coding)
+  at commit `ed1ebed3975cba04ed5e74c6ca73659274beb754`. Only the name is taken,
+  as a candidate; that repository has no license, so no sentence, description,
+  alias, example or arrangement of it is reused. Layers, tracks, prerequisites,
+  edges, descriptions and questions here are written independently. Where a
+  coined name has a generic equivalent, the concept uses the generic name and
+  keeps the coined one as an alias.
+- `mined`: proposed by `lexicon-mine` from external sources.
+- `manual`: added by hand, not from the dictionary.
+
+The files carry nothing beyond the `provenance` value; the schema has no field
+for it.
+
+`scripts/check-overlap.mjs` compares every concept file with the dictionary at
+that commit and fails on any shared run of 8 consecutive words. It needs
+network access, so CI does not run it; run it by hand whenever concept text
+changes and paste the output in the pull request:
+
+```sh
+node scripts/check-overlap.mjs
+```
+
 ## Example
 
 ````mdx

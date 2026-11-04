@@ -1,0 +1,17 @@
+---
+title: "Non-determinism"
+description: "Sending identical input twice and getting different output, because tokens are sampled and because serving hardware batches requests."
+layer: 1
+track: shared
+status: draft
+question: "Why can't you get the exact same answer twice, even with the same prompt?"
+prerequisites:
+  - temperature
+edges:
+  - type: RELATED_TO
+    to: inference
+sources:
+  - title: "Defeating Nondeterminism in LLM Inference (Thinking Machines Lab, 2025)"
+    url: "https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/"
+provenance: seed
+---
