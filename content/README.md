@@ -53,7 +53,9 @@ Whether the slugs in `prerequisites` and `edges` exist, and the graph rules
 that span files, are checked separately.
 
 `lexicon-core` (`crates/lexicon-core`) implements these rules and reports
-every problem in every file at once. The site validates only the subset it
+every broken file in one run. Within a file, YAML problems (syntax, unknown or
+missing fields, wrong types or values) stop at the first one; once the YAML
+reads, every rule above is checked and every violation reported. The site validates only the subset it
 needs to render a page (see `apps/web/README.md`).
 
 ## Example

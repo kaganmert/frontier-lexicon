@@ -235,6 +235,33 @@ const RULES: &[(&str, &str, Option<&str>, &str)] = &[
         Some("sources[0].url"),
         "http or https",
     ),
+    ("missing-title", "token.mdx", None, "missing field `title`"),
+    (
+        "missing-description",
+        "token.mdx",
+        None,
+        "missing field `description`",
+    ),
+    ("missing-layer", "token.mdx", None, "missing field `layer`"),
+    ("missing-track", "token.mdx", None, "missing field `track`"),
+    (
+        "multi-line-question",
+        "token.mdx",
+        Some("question"),
+        "single line",
+    ),
+    (
+        "multi-line-alias",
+        "token.mdx",
+        Some("aliases[0]"),
+        "single line",
+    ),
+    (
+        "multi-line-source-title",
+        "token.mdx",
+        Some("sources[0].title"),
+        "single line",
+    ),
 ];
 
 #[test]

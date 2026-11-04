@@ -43,9 +43,10 @@ pub enum Track {
 
 impl Track {
     /// Display order of the tracks: `shared`, `coding`, `research`, the same
-    /// as `tracks` in `apps/web/lib/site.ts`. Spelled out here rather than
-    /// derived from the declaration order, so reordering the variants cannot
-    /// silently change the canonical concept order.
+    /// as `tracks` in `apps/web/lib/site.ts` (a contract test keeps them in
+    /// step). Spelled out here rather than derived from the declaration order,
+    /// so reordering the variants cannot silently change the order of
+    /// [`crate::load_concepts`].
     pub fn rank(self) -> u8 {
         match self {
             Track::Shared => 0,

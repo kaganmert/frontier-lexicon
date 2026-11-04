@@ -128,11 +128,11 @@ struct Problems {
 }
 
 impl Problems {
-    fn file(&mut self, message: impl Into<String>) {
+    fn file_error(&mut self, message: impl Into<String>) {
         self.push(None, message.into());
     }
 
-    fn field(&mut self, field: impl Into<String>, message: impl Into<String>) {
+    fn field_error(&mut self, field: impl Into<String>, message: impl Into<String>) {
         self.push(Some(field.into()), message.into());
     }
 
@@ -147,15 +147,28 @@ impl Problems {
     /// Non-empty and free of line breaks.
     fn single_line(&mut self, field: impl Into<String>, value: &str) {
         if value.is_empty() {
-            self.field(field, "must not be empty");
+            self.field_error(field, "must not be empty");
         } else if value.contains(['\r', '\n']) {
-            self.field(field, "must be a single line");
+            self.field_error(field, "must be a single line");
+        }
+    }
+
+    /// Reports each repeat of an earlier non-empty item as `<list>[<i>]`.
+    fn no_duplicates(&mut self, list: &str, items: &[String]) {
+        let mut seen = HashSet::new();
+        for (i, item) in items.iter().enumerate() {
+            if !item.is_empty() && !seen.insert(item) {
+                self.field_error(
+                    format!("{list}[{i}]"),
+                    format!("\"{item}\" is listed twice"),
+                );
+            }
         }
     }
 
     fn slug(&mut self, field: impl Into<String>, value: &str) {
         if !is_valid_slug(value) {
-            self.field(
+            self.field_error(
                 field,
                 format!("\"{value}\" is not a lowercase kebab-case slug"),
             );
@@ -171,18 +184,18 @@ fn load_file(dir: &Path, name: OsString) -> Result<Concept, Vec<ContentError>> {
     };
 
     if path.is_dir() {
-        problems.file(
+        problems.file_error(
             "subdirectories are not allowed; concept files sit directly in the concept directory",
         );
         return Err(problems.errors);
     }
     let name = name.to_string_lossy();
     let Some(slug) = name.strip_suffix(".mdx") else {
-        problems.file("only <slug>.mdx files are allowed in the concept directory");
+        problems.file_error("only <slug>.mdx files are allowed in the concept directory");
         return Err(problems.errors);
     };
     if !is_valid_slug(slug) {
-        problems.file(format!(
+        problems.file_error(format!(
             "file name must be <slug>.mdx with a lowercase kebab-case slug (got \"{slug}\")"
         ));
     }
@@ -190,18 +203,18 @@ fn load_file(dir: &Path, name: OsString) -> Result<Concept, Vec<ContentError>> {
     let text = match std::fs::read(&path).map(String::from_utf8) {
         Ok(Ok(text)) => text,
         Ok(Err(_)) => {
-            problems.file("file is not valid UTF-8");
+            problems.file_error("file is not valid UTF-8");
             return Err(problems.errors);
         }
         Err(err) => {
-            problems.file(format!("cannot read file: {err}"));
+            problems.file_error(format!("cannot read file: {err}"));
             return Err(problems.errors);
         }
     };
     let split = match front_matter::split(&text) {
         Ok(split) => split,
         Err(message) => {
-            problems.file(message);
+            problems.file_error(message);
             return Err(problems.errors);
         }
     };
@@ -209,7 +222,7 @@ fn load_file(dir: &Path, name: OsString) -> Result<Concept, Vec<ContentError>> {
         Ok(fm) => fm,
         Err(err) => {
             // The YAML starts on line 2 of the file, after the opening `---`.
-            problems.file(err.render_with_options(render_options! {
+            problems.file_error(err.render_with_options(render_options! {
                 snippets: SnippetMode::Off,
                 line_offset: 1,
             }));
@@ -245,7 +258,7 @@ fn check(p: &mut Problems, fm: &FrontMatter, file_slug: &str) {
     if let Some(slug) = &fm.slug
         && slug != file_slug
     {
-        p.field(
+        p.field_error(
             "slug",
             format!("\"{slug}\" does not match the file name \"{file_slug}\""),
         );
@@ -253,43 +266,36 @@ fn check(p: &mut Problems, fm: &FrontMatter, file_slug: &str) {
     p.single_line("description", &fm.description);
     let length = fm.description.chars().count();
     if length > MAX_DESCRIPTION {
-        p.field(
+        p.field_error(
             "description",
             format!("must be at most {MAX_DESCRIPTION} characters (got {length})"),
         );
     }
     if !(1..=10).contains(&fm.layer) {
-        p.field(
+        p.field_error(
             "layer",
             format!("must be between 1 and 10 (got {})", fm.layer),
         );
     }
     p.single_line("question", &fm.question);
 
-    let mut seen = HashSet::new();
     for (i, alias) in fm.aliases.iter().enumerate() {
         let field = format!("aliases[{i}]");
         p.single_line(&field, alias);
         if *alias == fm.title {
-            p.field(&field, "must not repeat the title");
-        }
-        if !alias.is_empty() && !seen.insert(alias) {
-            p.field(&field, format!("\"{alias}\" is listed twice"));
+            p.field_error(&field, "must not repeat the title");
         }
     }
+    p.no_duplicates("aliases", &fm.aliases);
 
-    let mut seen = HashSet::new();
     for (i, slug) in fm.prerequisites.iter().enumerate() {
-        let field = format!("prerequisites[{i}]");
-        p.slug(&field, slug);
-        if !seen.insert(slug) {
-            p.field(&field, format!("\"{slug}\" is listed twice"));
-        }
+        p.slug(format!("prerequisites[{i}]"), slug);
     }
+    p.no_duplicates("prerequisites", &fm.prerequisites);
 
     for (i, edge) in fm.edges.iter().enumerate() {
         if edge.kind == EdgeType::PrerequisiteOf {
-            p.field(
+            p.field_error(
                 format!("edges[{i}].type"),
                 "PREREQUISITE_OF is not allowed here; list the concept under `prerequisites` of the dependent concept instead",
             );
@@ -300,7 +306,7 @@ fn check(p: &mut Problems, fm: &FrontMatter, file_slug: &str) {
     for (i, source) in fm.sources.iter().enumerate() {
         p.single_line(format!("sources[{i}].title"), &source.title);
         if let Err(message) = check_url(&source.url) {
-            p.field(format!("sources[{i}].url"), message);
+            p.field_error(format!("sources[{i}].url"), message);
         }
     }
 }

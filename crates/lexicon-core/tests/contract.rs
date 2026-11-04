@@ -35,3 +35,17 @@ fn slug_pattern_matches_the_web_side() {
     let rust_pattern = between(&rust, "Equivalent to the pattern `", "`");
     assert_eq!(rust_pattern, web_pattern);
 }
+
+#[test]
+fn track_order_matches_the_web_side() {
+    use lexicon_core::Track;
+    let site = repo_file("apps/web/lib/site.ts");
+    let web_order = between(&site, "export const tracks = [", "]");
+    let mut tracks = [Track::Coding, Track::Research, Track::Shared];
+    tracks.sort_by_key(|t| t.rank());
+    let rust_order: Vec<_> = tracks
+        .iter()
+        .map(|t| serde_json::to_string(t).unwrap())
+        .collect();
+    assert_eq!(rust_order.join(", "), web_order);
+}
