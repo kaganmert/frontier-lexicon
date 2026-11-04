@@ -1,0 +1,38 @@
+---
+title: Context window
+slug: context-window
+description: The maximum number of tokens a model can attend to in one request, prompt and output together.
+layer: 2
+track: shared
+status: published
+question: How much text can a model take into account at once, and what happens at the limit?
+aliases:
+  - context length
+  - context size
+prerequisites:
+  - token
+edges:
+  - type: CAUSES
+    to: context-rot
+  - type: RELATED_TO
+    to: prompt-caching
+sources:
+  - title: Anthropic documentation, Context windows
+    url: https://docs.claude.com/en/docs/build-with-claude/context-windows
+provenance: seed
+---
+
+## What it is
+
+The context window is the budget of tokens a model reads in one request.
+Everything counts against it: the system prompt, the conversation so far,
+tool results and the answer being generated.
+
+```python
+tokens_left = context_window - prompt_tokens - max_output_tokens
+```
+
+## Why it matters
+
+When the budget runs out, the oldest material has to be dropped or
+summarised, and quality usually degrades before the hard limit is reached.
