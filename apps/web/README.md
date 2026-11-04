@@ -24,22 +24,23 @@ Run from the repo root with the local turbo:
 
 The site is the Vercel project `frontier-lexicon` in the Hobby team `kagans-projects-9f4a9e36`, the team that also owns `kaganmert.com`. It is connected to this repository through the Vercel Git integration: every push to `main` deploys to production, every pull request gets a preview deployment, a deployment status check and a comment with the preview URL. The Vercel check is not a required status check on `main`; only the CI jobs `web` and `rust` are.
 
-| Setting                                         | Value                                                  |
-| ----------------------------------------------- | ------------------------------------------------------ |
-| Framework preset                                | Next.js                                                |
-| Root Directory                                  | `apps/web`                                             |
-| Include source files outside the Root Directory | on (the build reads `../../content/concepts`)          |
-| Skip deployment (monorepo)                      | on, the default; Ignored Build Step empty              |
-| Install / build command                         | framework defaults (`pnpm install`, `next build`)      |
-| Node.js                                         | 24.x, matching `engines.node` in the root package.json |
-| Vercel Authentication                           | off, so previews are public and reachable with `curl`  |
+| Setting                                         | Value                                                                             |
+| ----------------------------------------------- | --------------------------------------------------------------------------------- |
+| Framework preset                                | Next.js                                                                           |
+| Root Directory                                  | `apps/web`                                                                        |
+| Include source files outside the Root Directory | on (the build reads `../../content/concepts`)                                     |
+| Skip deployment (monorepo)                      | on, the default; Ignored Build Step empty                                         |
+| Install / build command                         | framework defaults: `pnpm install`, then `turbo run build` (Vercel detects Turbo) |
+| Node.js                                         | 24.x, matching `engines.node` in the root package.json                            |
+| Vercel Authentication                           | off, so previews are public and reachable with `curl`                             |
 
 | Environment variable           | Environments                     | Value                           |
 | ------------------------------ | -------------------------------- | ------------------------------- |
 | `ENABLE_EXPERIMENTAL_COREPACK` | production, preview, development | `1`                             |
 | `NEXT_PUBLIC_SITE_URL`         | production                       | `https://lexicon.kaganmert.com` |
 
-- **Corepack** makes Vercel install exactly the pnpm in `packageManager` (`11.23.0`). Without it Vercel still reads the field but uses whatever pnpm 11.x it bundles. Corepack is not shipped with Node 25 and later, so check that Vercel's newer image still provides it before raising `engines.node`.
+- **Build command.** Vercel detects Turborepo and runs `turbo run build` scoped to `web`, not plain `next build`. That runs `generate`, `check` and `build` in order (see `turbo.json`), so a type error fails the deployment, and Vercel provides the Turbo remote cache.
+- **Corepack** makes Vercel install exactly the pnpm in `packageManager` (`11.23.0`). The variable is listed in `globalPassThroughEnv` in `turbo.json`: no task reads it, and without the entry turbo's strict env mode warns on every Vercel build. Without it Vercel still reads the field but uses whatever pnpm 11.x it bundles. Corepack is not shipped with Node 25 and later, so check that Vercel's newer image still provides it before raising `engines.node`.
 - **Previews** carry no `NEXT_PUBLIC_SITE_URL`: the default in `lib/site.ts` is the production origin, and Vercel sends `X-Robots-Tag: noindex` on `*.vercel.app` preview URLs, so preview canonicals pointing at production are what we want.
 - **Content-only commits deploy.** `content/` and `crates/` are outside the pnpm workspace, so Vercel's skip logic treats changes there as global.
 - **Domain.** `lexicon.kaganmert.com` is a DNS record at Namecheap (BasicDNS for `kaganmert.com`): `CNAME lexicon → ea5904d97cc7d5c6.vercel-dns-017.com.` This target is specific to the project; take it from the project's Domains page if the project is ever recreated.
