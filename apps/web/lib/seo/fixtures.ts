@@ -25,11 +25,11 @@ export const sycophancy: Concept = {
   mdx: "",
 };
 
-/** A draft: must never reach the public site. */
+/** A draft; `publishedOnly` must drop it. */
 export const promptCaching: Concept = {
   slug: "prompt-caching",
   title: "Prompt caching",
-  description: "DRAFT-ONLY description that must not leak.",
+  description: "Reusing the computed prefix of a prompt across requests.",
   layer: 2,
   track: "shared",
   status: "draft",

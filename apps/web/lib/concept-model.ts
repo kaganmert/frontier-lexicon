@@ -57,8 +57,13 @@ export function sortConcepts<T extends ConceptSummary>(
     (a, b) =>
       a.layer - b.layer ||
       tracks.indexOf(a.track) - tracks.indexOf(b.track) ||
-      (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0),
+      compareCodeUnits(a.slug, b.slug),
   );
+}
+
+/** Plain `<` / `>` string order, independent of locale and ICU data. */
+function compareCodeUnits(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 /** The concepts the public site may show: drafts dropped, order kept. */

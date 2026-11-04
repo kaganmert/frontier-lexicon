@@ -59,3 +59,25 @@ fn track_order_matches_the_web_side() {
         .collect();
     assert_eq!(rust_order, web_order);
 }
+
+#[test]
+fn statuses_match_the_web_side() {
+    use lexicon_core::Status;
+    let model = repo_file("apps/web/lib/concept-model.ts");
+    let web: Vec<_> = between(&model, "export const statuses = [", "]")
+        .split(',')
+        .map(|s| s.trim().trim_matches('"'))
+        .filter(|s| !s.is_empty())
+        .collect();
+    let rust: Vec<_> = [Status::Draft, Status::Published]
+        .iter()
+        .map(|s| {
+            serde_json::to_value(s)
+                .unwrap()
+                .as_str()
+                .unwrap()
+                .to_owned()
+        })
+        .collect();
+    assert_eq!(rust, web);
+}

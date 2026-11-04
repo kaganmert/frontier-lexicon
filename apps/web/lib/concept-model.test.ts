@@ -24,9 +24,7 @@ describe("sortConcepts", () => {
       "sycophancy",
     ]);
   });
-});
 
-describe("sortConcepts tie-break", () => {
   it("compares slugs by code unit, not titles, so it matches the Rust order", () => {
     const agent = { ...coding, title: "Agent", slug: "coding-agent" };
     const compaction = { ...coding, title: "Compaction", slug: "autocompact" };

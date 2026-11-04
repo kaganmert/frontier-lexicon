@@ -13,8 +13,10 @@ export {
 
 /**
  * The collection is fixed at build time, so filter, sort and index it once.
- * Drafts are dropped here and nowhere else: nothing in the site can reach one,
- * so no draft page, `.md`, OG image, sitemap or llms entry is ever built.
+ * Every page and route reads concepts through this module, and it exposes no
+ * unfiltered accessor, so no draft page, OG image, sitemap or llms entry is
+ * ever built. (The `.md` alternates are written before Next runs, in
+ * `content-collections.ts`, with the same `publishedOnly` filter.)
  */
 const published: readonly Concept[] = publishedOnly(sortConcepts(allConcepts));
 const bySlug = new Map(published.map((concept) => [concept.slug, concept]));
