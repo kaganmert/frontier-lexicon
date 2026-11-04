@@ -1,0 +1,16 @@
+[package]
+name = "lexicon-mine"
+description = "Mines candidate terms from job postings and repositories"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "lexicon-mine"
+path = "src/main.rs"
+
+[dependencies]
+lexicon-core = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true }
