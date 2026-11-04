@@ -1,0 +1,21 @@
+---
+title: "Automated check"
+description: "Tests, type checkers, linters and builds: tools that give the agent a yes or no about its change without anyone having to look."
+layer: 9
+track: coding
+status: draft
+question: "How does an agent find out it broke something before you do?"
+aliases:
+  - "test suite"
+  - "type check"
+  - "linter"
+prerequisites:
+  - environment
+edges:
+  - type: MITIGATES
+    to: hallucination
+sources:
+  - title: "Continuous Integration (Martin Fowler)"
+    url: "https://martinfowler.com/articles/continuousIntegration.html"
+provenance: seed
+---

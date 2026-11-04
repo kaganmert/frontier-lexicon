@@ -1,0 +1,25 @@
+---
+title: "Compaction"
+description: "Replacing a long conversation history with a model-written summary inside the same session, freeing context at the cost of detail."
+layer: 8
+track: coding
+status: draft
+question: "What does an agent lose when it summarises its own history to keep going?"
+aliases:
+  - "autocompact"
+  - "/compact"
+  - "summarisation"
+prerequisites:
+  - session
+  - context-window
+  - secondary-source
+edges:
+  - type: MITIGATES
+    to: context-rot
+sources:
+  - title: "Claude docs: Compaction overview"
+    url: "https://platform.claude.com/docs/en/build-with-claude/compaction"
+  - title: "Claude Code docs: Manage costs effectively"
+    url: "https://code.claude.com/docs/en/costs"
+provenance: seed
+---

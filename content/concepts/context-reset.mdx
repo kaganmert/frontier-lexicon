@@ -1,0 +1,22 @@
+---
+title: "Context reset"
+description: "Ending a session and starting a new one with an empty context, so the next request carries none of the old conversation."
+layer: 8
+track: coding
+status: draft
+question: "When is starting over faster than continuing?"
+aliases:
+  - "clearing"
+  - "/clear"
+  - "fresh session"
+prerequisites:
+  - session
+  - context-window
+edges:
+  - type: MITIGATES
+    to: context-rot
+sources:
+  - title: "Claude Code docs: Manage costs effectively"
+    url: "https://code.claude.com/docs/en/costs"
+provenance: seed
+---
