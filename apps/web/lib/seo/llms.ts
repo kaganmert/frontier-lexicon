@@ -29,7 +29,7 @@ function conceptLine(concept: ConceptSummary): string {
 export function buildLlmsTxt(concepts: readonly ConceptSummary[]): string {
   const sections: string[] = [
     header(),
-    "Concepts are grouped by layer, from model fundamentals (layer 1) to research vocabulary (layer 10). A `PREREQUISITE_OF` edge always points from a lower layer to a higher one, so the layers double as a learning order. Every page is also available as plain Markdown at the link next to it.",
+    "Concepts are grouped by layer, from model fundamentals (layer 1) to research vocabulary (layer 10). A `PREREQUISITE_OF` edge never points from a higher layer to a lower one, so the layers double as a learning order. Every page is also available as plain Markdown at the link next to it.",
   ];
 
   const groups = groupByLayer(concepts);

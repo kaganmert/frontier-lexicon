@@ -28,7 +28,7 @@ export default function HomePage() {
         <h2 className="text-xl font-semibold">How it is organised</h2>
         <p>
           Concepts are nodes in a layered directed acyclic graph. A prerequisite
-          edge always points from a lower layer to a higher one, so the graph
+          edge never points from a higher layer to a lower one, so the graph
           doubles as a learning path. Other edges (measures, mitigates, causes,
           related to) carry the concept map itself.
         </p>

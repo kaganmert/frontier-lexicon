@@ -64,6 +64,33 @@ missing fields, wrong types or values) stop at the first one; once the YAML
 reads, every rule above is checked and every violation reported. The site validates only the subset it
 needs to render a page (see `apps/web/README.md`).
 
+## Graph rules
+
+Once every file passes the rules above, the concepts are checked as a graph:
+
+1. Every slug in `prerequisites` and in `edges[].to` names an existing concept.
+2. A concept does not list itself, in `prerequisites` or as an edge target.
+3. The same edge (same source, target and type) is not declared twice. Two
+   edges in opposite directions, or two edges of different types between the
+   same concepts, are fine.
+4. A prerequisite is never in a higher layer than the concept that needs it.
+   Prerequisites in the same layer are allowed.
+5. Prerequisites never form a cycle (`a` needs `b`, `b` needs `c`, `c` needs
+   `a`). Each cycle is reported once, as `a → b → c → a`, starting from its
+   alphabetically first slug.
+
+Graph rules run only when no file has an error of its own.
+
+Run every check from anywhere in the repository:
+
+```sh
+cargo run -p lexicon -- validate
+```
+
+It prints every problem on its own line and exits with 1, or prints
+`validated <n> concepts, <e> edges` and exits with 0. CI runs it on every pull
+request.
+
 ## Example
 
 ````mdx
