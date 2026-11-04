@@ -50,19 +50,9 @@ The site is the Vercel project `frontier-lexicon` in the Hobby team `kagans-proj
 
 Concept files live outside this package, in `content/concepts/<slug>.mdx` (CC BY-NC-SA 4.0). They are loaded with [Content Collections](https://www.content-collections.dev/); the config is `content-collections.ts`.
 
-Front matter validated here, on purpose minimal (the full schema is fixed together with the Rust engine in `crates/lexicon-core`):
+The front matter contract (every field, the file naming and delimiting rules, an example) is documented once, in [`content/README.md`](../../content/README.md), and implemented in full by `crates/lexicon-core`. The site deliberately validates only the subset it needs to render a page (`lib/concept-schema.ts`): `title`, `description`, `layer`, `track` and the optional `slug`. Every other field passes through untouched.
 
-```yaml
----
-title: Context window # required, single line
-description: One or two sentences, max 160 characters. # required, single line, used as meta description
-layer: 2 # 1–10
-track: shared # coding | research | shared
-slug: context-window # optional; must equal the file name if present
----
-```
-
-Any other field (`question`, `prerequisites`, `edges`, `sources`, `provenance`) passes through untouched. Bodies start at H2; the page renders the title as the only H1. Files sit directly in `content/concepts/` and are named `<slug>.mdx` with a lowercase kebab-case slug; subdirectories and other file names fail the build. Invalid front matter fails the build with the file name.
+Bodies start at H2; the page renders the title as the only H1. Files sit directly in `content/concepts/` and are named `<slug>.mdx` with a lowercase kebab-case slug; subdirectories and other file names fail the build. Invalid front matter fails the build with the file name.
 
 With an empty `content/concepts/` the build still succeeds: the home page, `/concepts/`, `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt` and the site OG image are all produced, with explicit empty states.
 
