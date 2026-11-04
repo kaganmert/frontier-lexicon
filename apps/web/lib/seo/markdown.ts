@@ -21,7 +21,13 @@ export function conceptToMarkdown(concept: Concept): string {
     "---",
   ].join("\n");
 
-  const body = concept.body.replace(/\s+$/, "");
+  const body = concept.body.trim();
+  const sections = [
+    frontMatter,
+    `# ${concept.title}`,
+    `> ${concept.description}`,
+    ...(body === "" ? [] : [body]),
+  ];
 
-  return `${frontMatter}\n\n# ${concept.title}\n\n> ${concept.description}\n\n${body}\n`;
+  return `${sections.join("\n\n")}\n`;
 }

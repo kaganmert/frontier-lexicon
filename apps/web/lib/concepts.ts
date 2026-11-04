@@ -11,10 +11,14 @@ export {
   groupByTrack,
 } from "./concept-model";
 
-export function getConcepts(): Concept[] {
-  return sortConcepts(allConcepts);
+/** The collection is fixed at build time, so sort and index it once. */
+const concepts: readonly Concept[] = sortConcepts(allConcepts);
+const bySlug = new Map(concepts.map((concept) => [concept.slug, concept]));
+
+export function getConcepts(): readonly Concept[] {
+  return concepts;
 }
 
 export function getConcept(slug: string): Concept | undefined {
-  return getConcepts().find((c) => c.slug === slug);
+  return bySlug.get(slug);
 }

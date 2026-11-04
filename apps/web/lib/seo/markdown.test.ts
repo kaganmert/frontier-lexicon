@@ -45,4 +45,10 @@ describe("conceptToMarkdown", () => {
     expect(md.endsWith("end\n")).toBe(true);
     expect(md.endsWith("\n\n")).toBe(false);
   });
+
+  it("ends right after the description when the body is empty", () => {
+    const md = conceptToMarkdown({ ...contextWindow, body: "\n\n" });
+    expect(md.endsWith("degrades answers.\n")).toBe(true);
+    expect(md.endsWith("\n\n")).toBe(false);
+  });
 });

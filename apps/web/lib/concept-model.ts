@@ -18,11 +18,8 @@ export type Concept = ConceptSummary & {
 
 export const conceptsIndexPath = "/concepts/";
 
-/**
- * Slugs that would collide with other generated files (`/og/site.png`,
- * `/og/concepts.png`) and are therefore refused at build time.
- */
-export const reservedSlugs = ["site", "concepts"] as const;
+/** Lowercase kebab-case: the only shape a slug (and so a file name) may take. */
+export const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export function conceptPath(slug: string): string {
   return `${conceptsIndexPath}${slug}/`;

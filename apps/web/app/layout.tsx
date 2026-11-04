@@ -3,7 +3,7 @@ import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import { conceptsIndexPath } from "@/lib/concept-model";
 import { websiteJsonLd } from "@/lib/seo/jsonld";
-import { OG_SITE, ogImageMeta } from "@/lib/og";
+import { OG_SITE, ogImageMeta, openGraphBase } from "@/lib/og";
 import { siteDescription, siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -14,14 +14,11 @@ export const metadata: Metadata = {
     template: `%s · ${siteName}`,
   },
   description: siteDescription,
-  alternates: { canonical: "/" },
+  // No canonical here: it would be inherited by routes without their own,
+  // including the 404 page. Each page sets its own.
   openGraph: {
+    ...openGraphBase,
     type: "website",
-    siteName,
-    locale: "en_US",
-    url: "/",
-    title: `${siteName} · a layered map of modern AI concepts`,
-    description: siteDescription,
     images: ogImageMeta(
       OG_SITE,
       `${siteName}: a layered map of modern AI concepts`,

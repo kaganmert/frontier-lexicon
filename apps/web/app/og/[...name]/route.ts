@@ -1,10 +1,10 @@
 import { conceptEyebrow, getConcept, getConcepts } from "@/lib/concepts";
-import { ogImage, OG_INDEX, OG_SITE } from "@/lib/og";
+import { conceptOgName, ogImage, OG_INDEX, OG_SITE } from "@/lib/og";
 import { siteDescription, siteName } from "@/lib/site";
 
 /**
  * OpenGraph images, one PNG per page, rendered at build time:
- * `/og/site.png`, `/og/concepts.png` and `/og/<slug>.png`.
+ * `/og/site.png`, `/og/concepts.png` and `/og/concepts/<slug>.png`.
  *
  * A catch-all route handler is used instead of the `opengraph-image.tsx`
  * convention because Next does not allow that convention below an optional
@@ -14,11 +14,12 @@ export const dynamic = "force-static";
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return [OG_SITE, OG_INDEX, ...getConcepts().map(({ slug }) => slug)].map(
-    (name) => ({
-      name: [`${name}.png`],
-    }),
-  );
+  const names = [
+    OG_SITE,
+    OG_INDEX,
+    ...getConcepts().map(({ slug }) => conceptOgName(slug)),
+  ];
+  return names.map((name) => ({ name: `${name}.png`.split("/") }));
 }
 
 export async function GET(
@@ -37,7 +38,11 @@ export async function GET(
     });
   }
 
-  const concept = getConcept(key);
+  const [scope, slug, ...rest] = key.split("/");
+  const concept =
+    scope === "concepts" && slug !== undefined && rest.length === 0
+      ? getConcept(slug)
+      : undefined;
   if (!concept) return new Response("Not found", { status: 404 });
   return ogImage({
     eyebrow: conceptEyebrow(concept),

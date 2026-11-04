@@ -28,6 +28,13 @@ describe("buildLlmsTxt", () => {
     expect(txt.endsWith("\n")).toBe(true);
   });
 
+  it("escapes square brackets in titles so the link text stays intact", () => {
+    const txt = buildLlmsTxt([{ ...contextWindow, title: "RAG [retrieval]" }]);
+    expect(txt).toContain(
+      "- [RAG \\[retrieval\\]](https://lexicon.kaganmert.com/concepts/context-window/)",
+    );
+  });
+
   it("states the empty state explicitly when there are no concepts", () => {
     const txt = buildLlmsTxt([]);
     expect(txt).toContain(

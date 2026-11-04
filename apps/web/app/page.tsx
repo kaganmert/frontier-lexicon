@@ -1,6 +1,22 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { conceptsIndexPath, getConcepts } from "@/lib/concepts";
+import { OG_SITE, ogImageMeta, openGraphBase } from "@/lib/og";
 import { siteDescription, siteName } from "@/lib/site";
+
+const homeTitle = `${siteName} · a layered map of modern AI concepts`;
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: {
+    ...openGraphBase,
+    type: "website",
+    url: "/",
+    title: homeTitle,
+    description: siteDescription,
+    images: ogImageMeta(OG_SITE, homeTitle),
+  },
+};
 
 export default function HomePage() {
   const concepts = getConcepts();

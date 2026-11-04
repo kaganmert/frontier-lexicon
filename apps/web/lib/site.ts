@@ -2,9 +2,23 @@
 
 const DEFAULT_SITE_URL = "https://lexicon.kaganmert.com";
 
+/** Validate `NEXT_PUBLIC_SITE_URL` once at startup; a bad value fails the build with a message instead of leaking relative URLs. */
 function normaliseSiteUrl(raw: string | undefined): string {
   const value = (raw ?? "").trim();
   if (value === "") return DEFAULT_SITE_URL;
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    throw new Error(
+      `NEXT_PUBLIC_SITE_URL must be an absolute URL such as ${DEFAULT_SITE_URL}, got "${value}"`,
+    );
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new Error(
+      `NEXT_PUBLIC_SITE_URL must use http or https, got "${value}"`,
+    );
+  }
   return value.replace(/\/+$/, "");
 }
 

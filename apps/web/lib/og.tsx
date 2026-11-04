@@ -1,10 +1,22 @@
+import type { Metadata } from "next";
 import { ImageResponse } from "next/og";
 import { siteName } from "./site";
 
 export const ogSize = { width: 1200, height: 630 };
 
+/**
+ * Next replaces a layout's `openGraph` wholesale when a page defines its own,
+ * so every page spreads this base into its `openGraph` instead of inheriting.
+ */
+export const openGraphBase = {
+  siteName,
+  locale: "en_US",
+} satisfies Metadata["openGraph"];
+
+/** Image names: the two site-level cards, and `concepts/<slug>` per lesson. */
 export const OG_SITE = "site";
 export const OG_INDEX = "concepts";
+export const conceptOgName = (slug: string) => `concepts/${slug}`;
 
 /** Site-relative path of a page's OpenGraph image. */
 export function ogPath(name: string): string {

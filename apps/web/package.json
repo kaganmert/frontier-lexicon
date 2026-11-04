@@ -7,7 +7,7 @@
     "dev": "next dev",
     "generate": "content-collections build",
     "build": "next build",
-    "check": "tsc --noEmit",
+    "check": "next typegen && tsc --noEmit",
     "lint": "eslint",
     "format": "prettier --write .",
     "test": "vitest run"

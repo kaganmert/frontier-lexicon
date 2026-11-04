@@ -16,10 +16,13 @@ function header(): string {
   return `# ${siteName}\n\n> ${siteDescription}`;
 }
 
+/** Square brackets would end the link text early. */
+const linkText = (text: string) => text.replace(/[[\]]/g, "\\$&");
+
 function conceptLine(concept: ConceptSummary): string {
   const page = absoluteUrl(conceptPath(concept.slug));
   const markdown = absoluteUrl(conceptMarkdownPath(concept.slug));
-  return `- [${concept.title}](${page}): ${concept.description} ([Markdown](${markdown}))`;
+  return `- [${linkText(concept.title)}](${page}): ${concept.description} ([Markdown](${markdown}))`;
 }
 
 /** `/llms.txt` as described at https://llmstxt.org/ */

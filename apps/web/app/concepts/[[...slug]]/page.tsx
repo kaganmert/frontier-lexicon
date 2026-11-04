@@ -14,7 +14,7 @@ import {
   groupByTrack,
   type Concept,
 } from "@/lib/concepts";
-import { OG_INDEX, ogImageMeta } from "@/lib/og";
+import { conceptOgName, OG_INDEX, ogImageMeta, openGraphBase } from "@/lib/og";
 import {
   breadcrumbJsonLd,
   definedTermJsonLd,
@@ -39,6 +39,8 @@ const indexMetadata: Metadata = {
     "Every concept in frontier-lexicon, grouped by layer from model fundamentals to research vocabulary.",
   alternates: { canonical: conceptsIndexPath },
   openGraph: {
+    ...openGraphBase,
+    type: "website",
     url: conceptsIndexPath,
     title: "Concepts",
     images: ogImageMeta(
@@ -77,11 +79,12 @@ export async function generateMetadata({
       },
     },
     openGraph: {
+      ...openGraphBase,
       type: "article",
       url: conceptPath(concept.slug),
       title: concept.title,
       description: concept.description,
-      images: ogImageMeta(concept.slug, concept.title),
+      images: ogImageMeta(conceptOgName(concept.slug), concept.title),
     },
   };
 }
