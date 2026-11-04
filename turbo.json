@@ -40,7 +40,7 @@
     "web#build": {
       "dependsOn": ["^build", "check"],
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"],
-      "outputs": ["out/**", ".next/**", "!.next/cache/**"]
+      "outputs": ["out/**", ".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
     "web#check": {
       "dependsOn": ["generate"]
