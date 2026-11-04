@@ -42,8 +42,10 @@ struct Link<'a> {
 ///    (same-layer prerequisites are allowed);
 /// 5. the `PREREQUISITE_OF` subgraph has no cycles.
 ///
-/// An entry failing rule 1 or 2 is reported once and left out of rules 3–5;
-/// a duplicate is reported once and counted once.
+/// An entry failing rule 1 or 2 is reported once and left out of rules 3–5.
+/// Every repeat of an edge is reported, and only the first counts for rules
+/// 4 and 5. Rule 5 reports one cycle per strongly connected component, even
+/// when the component holds several cycles.
 pub fn validate_graph(concepts: &[Concept]) -> Vec<GraphError> {
     let by_slug: HashMap<&str, &Concept> = concepts.iter().map(|c| (c.slug.as_str(), c)).collect();
     let mut errors = Vec::new();

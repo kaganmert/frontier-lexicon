@@ -1,5 +1,5 @@
-//! Loading and graph checks as one step: what `lexicon validate` and
-//! `lexicon build` run.
+//! Loading and graph checks as one step: what `lexicon validate` runs, and
+//! what `lexicon build` is to run before writing `graph.json`.
 
 use std::fmt;
 use std::path::Path;

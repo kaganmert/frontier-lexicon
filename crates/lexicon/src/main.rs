@@ -42,10 +42,7 @@ fn main() -> Result<()> {
             let dir = content.unwrap_or_else(default_content_dir);
             match validate_dir(&dir) {
                 Ok(concepts) => {
-                    let edges: usize = concepts
-                        .iter()
-                        .map(|c| c.prerequisites.len() + c.edges.len())
-                        .sum();
+                    let edges: usize = concepts.iter().map(|c| c.edge_count()).sum();
                     println!("validated {} concepts, {edges} edges", concepts.len());
                 }
                 Err(err) => fail(&dir, &err),
@@ -59,8 +56,8 @@ fn main() -> Result<()> {
 /// Prints every problem to stderr, sorted, one per line, and exits with the
 /// matching code.
 fn fail(dir: &Path, err: &ValidationError) -> ! {
-    if let ValidationError::Io(io) = err {
-        eprintln!("cannot read concept directory {}: {io}", dir.display());
+    if let ValidationError::Io(_) = err {
+        eprintln!("{}: {err}", dir.display());
         exit(EXIT_IO);
     }
     let mut lines = err.lines();

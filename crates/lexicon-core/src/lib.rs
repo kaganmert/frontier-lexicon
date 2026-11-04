@@ -1,12 +1,13 @@
 //! Concept graph model for frontier-lexicon.
 //!
 //! The content files under `content/` are the source of truth. This crate
-//! loads them, validates the schema and enforces the two graph invariants:
-//! no `PREREQUISITE_OF` edge points backwards across layers, and the
-//! prerequisite subgraph has no cycles.
+//! loads them and validates the schema ([`load_concepts`]), then checks the
+//! rules that span concepts ([`validate_graph`]): references resolve, nothing
+//! references itself or repeats an edge, no `PREREQUISITE_OF` edge points from
+//! a higher layer to a lower one, and the prerequisite subgraph has no cycles.
+//! [`validate_dir`] runs both.
 //!
-//! The front matter contract itself is documented for authors in
-//! `content/README.md`; [`load_concepts`] is its only implementation.
+//! Both sets of rules are documented for authors in `content/README.md`.
 //!
 //! # Dependency choices
 //!
@@ -18,6 +19,10 @@
 //!   rule is checked after deserialisation.
 //! - Source URLs are parsed with [`url`](https://crates.io/crates/url), the
 //!   WHATWG URL implementation.
+//! - Cycles are found with [`petgraph`](https://crates.io/crates/petgraph)'s
+//!   `tarjan_scc` over a `DiGraphMap` (only the `graphmap` feature). It yields
+//!   the strongly connected components but no cycle path, so one cycle per
+//!   component is walked by hand to name it.
 //! - No regex crate: the one pattern the schema needs (the slug) is a
 //!   hand-rolled predicate, [`is_valid_slug`].
 

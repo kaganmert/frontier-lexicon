@@ -32,6 +32,23 @@ fn validate(args: &[&str], cwd: Option<&Path>) -> Run {
     }
 }
 
+/// A scratch directory removed on drop, so a failing test leaves nothing behind.
+struct TempDir(PathBuf);
+
+impl TempDir {
+    fn new(name: &str) -> Self {
+        let dir = std::env::temp_dir().join(format!("{name}-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        TempDir(dir)
+    }
+}
+
+impl Drop for TempDir {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+
 fn validate_fixture(case: &str) -> Run {
     validate(&["--content", fixture(case).to_str().unwrap()], None)
 }
@@ -101,7 +118,8 @@ fn a_missing_directory_exits_2() {
 
 #[test]
 fn finds_content_from_any_directory_below_the_cargo_lock() {
-    let root = std::env::temp_dir().join(format!("lexicon-validate-{}", std::process::id()));
+    let tmp = TempDir::new("lexicon-validate");
+    let root = &tmp.0;
     let nested = root.join("crates/lexicon/src");
     std::fs::create_dir_all(&nested).unwrap();
     std::fs::create_dir_all(root.join("content/concepts")).unwrap();
@@ -113,17 +131,15 @@ fn finds_content_from_any_directory_below_the_cargo_lock() {
     .unwrap();
 
     let run = validate(&[], Some(&nested));
-    std::fs::remove_dir_all(&root).unwrap();
     assert_eq!(run.code, Some(0), "{:?}", run.stderr_lines);
     assert_eq!(run.stdout, "validated 1 concepts, 0 edges\n");
 }
 
 #[test]
 fn without_a_cargo_lock_above_it_exits_2() {
-    let dir = std::env::temp_dir().join(format!("lexicon-no-lock-{}", std::process::id()));
-    std::fs::create_dir_all(&dir).unwrap();
-    let run = validate(&[], Some(&dir));
-    std::fs::remove_dir_all(&dir).unwrap();
+    // Assumes no ancestor of the system temp directory holds a Cargo.lock.
+    let tmp = TempDir::new("lexicon-no-lock");
+    let run = validate(&[], Some(&tmp.0));
     assert_eq!(run.code, Some(2));
     assert!(
         run.stderr_lines[0].contains("Cargo.lock"),

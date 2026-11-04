@@ -39,6 +39,14 @@ pub struct Concept {
     pub body: String,
 }
 
+impl Concept {
+    /// Edges this concept declares: one `PREREQUISITE_OF` per prerequisite
+    /// (pointing to this concept) plus every entry in `edges`.
+    pub fn edge_count(&self) -> usize {
+        self.prerequisites.len() + self.edges.len()
+    }
+}
+
 /// Whether a concept is ready to be published.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

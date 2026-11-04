@@ -76,20 +76,29 @@ Once every file passes the rules above, the concepts are checked as a graph:
 4. A prerequisite is never in a higher layer than the concept that needs it.
    Prerequisites in the same layer are allowed.
 5. Prerequisites never form a cycle (`a` needs `b`, `b` needs `c`, `c` needs
-   `a`). Each cycle is reported once, as `a → b → c → a`, starting from its
-   alphabetically first slug.
+   `a`). Each group of concepts caught in cycles is reported once, with one
+   cycle through it such as `a → b → c → a`, starting from the alphabetically
+   first slug. Fix that one and run again: another cycle in the same group
+   shows up then.
 
 Graph rules run only when no file has an error of its own.
 
 Run every check from anywhere in the repository:
 
 ```sh
-cargo run -p lexicon -- validate
+cargo run -p lexicon --locked -- validate                    # content/concepts of this repo
+cargo run -p lexicon --locked -- validate --content <dir>    # any other directory
 ```
 
-It prints every problem on its own line and exits with 1, or prints
-`validated <n> concepts, <e> edges` and exits with 0. CI runs it on every pull
-request.
+Exit codes:
+
+- `0`: everything passes; prints `validated <n> concepts, <e> edges`.
+- `1`: content or graph problems; each is printed on its own line as
+  `<file>: <message>`, sorted.
+- `2`: the directory is missing or unreadable, or, without `--content`, no
+  `Cargo.lock` was found in the current directory or above it.
+
+CI runs it on every pull request.
 
 ## Example
 
