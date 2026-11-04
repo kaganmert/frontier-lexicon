@@ -8,9 +8,11 @@ on:
 permissions:
   contents: read
 
+# Superseded PR pushes cancel the older run; pushes to main always finish so
+# every main commit ends with a completed status.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   web:
@@ -29,11 +31,8 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm exec turbo run check lint test build --filter=web
-
-      # The `format` task writes; CI only checks.
-      - run: pnpm exec prettier --check .
-        working-directory: apps/web
+      # `format` writes, `format:check` only checks.
+      - run: pnpm exec turbo run check lint test build format:check --filter=web
 
   rust:
     name: rust

@@ -24,12 +24,15 @@ Reproduce locally from the repo root:
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm exec turbo run check lint test build --filter=web
-(cd apps/web && pnpm exec prettier --check .)
+pnpm exec turbo run check lint test build format:check --filter=web
 cargo fmt --all --check
 cargo clippy --workspace --locked -- -D warnings
 cargo test --workspace --locked
 ```
+
+The Rust job uses the current stable toolchain, so a new stable release can
+introduce clippy lints that turn `main` red without a code change. Fix the
+lint rather than pinning the toolchain.
 
 ## Licensing
 
