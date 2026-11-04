@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/kaganmert/frontier-lexicon/actions/workflows/ci.yml/badge.svg)](https://github.com/kaganmert/frontier-lexicon/actions/workflows/ci.yml)
 
+Live at **https://lexicon.kaganmert.com**.
+
 An interactive, layered map of modern AI concepts, from tokens to alignment research.
 Click a node for the theory, a hands-on exercise, and the concepts you need first.
 
