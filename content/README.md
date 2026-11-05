@@ -37,7 +37,7 @@ Unknown fields are errors, including inside `edges` and `sources` items.
 | `track` | yes | `coding`, `research` or `shared`. |
 | `status` | yes | `draft` or `published`. There is no default. |
 | `question` | yes | Non-empty, single line: the learning question the page answers. |
-| `aliases` | no | List of other names. Each non-empty and single line, no duplicates, none equal to `title`. |
+| `aliases` | no | List of other names for the same concept: no examples, narrower or broader terms, commands or vendor-specific files. Each non-empty and single line, no duplicates, none equal to `title`. |
 | `prerequisites` | no | List of slugs this concept builds on, no duplicates. Each one becomes a `PREREQUISITE_OF` edge pointing to this concept. |
 | `edges` | no | List of `{ type, to }`. `type` is `MEASURES`, `MITIGATES`, `CAUSES` or `RELATED_TO`; `to` is a slug. `PREREQUISITE_OF` is not allowed here: use `prerequisites` on the dependent concept. |
 | `sources` | no | List of `{ title, url }`. `title` non-empty and single line; `url` an absolute `http` or `https` URL. |
