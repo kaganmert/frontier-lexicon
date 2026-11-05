@@ -1,5 +1,5 @@
 use std::io::ErrorKind;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::process::exit;
 
 use anyhow::Result;
@@ -68,8 +68,9 @@ fn main() -> Result<()> {
             check,
         } => {
             let dir = content.unwrap_or_else(default_content_dir);
-            let out = out.unwrap_or_else(|| default_out(&dir));
             let concepts = validate_dir(&dir).unwrap_or_else(|err| fail(&err));
+            let out = out.unwrap_or_else(|| default_out(&dir));
+            refuse_inside(&out, &dir);
             let json = graph_json(&concepts);
             if check {
                 check_graph(&out, &json);
@@ -82,13 +83,49 @@ fn main() -> Result<()> {
 }
 
 /// `graph.json` next to the concept directory: `content/graph.json` for
-/// `content/concepts`.
+/// `content/concepts`. When the path does not end in a directory name (`.`,
+/// `..`, `/`), its lexical parent is not the real one, so the directory is
+/// resolved first; it exists, since validation just read it.
 fn default_out(content: &Path) -> PathBuf {
-    content.parent().unwrap_or(content).join("graph.json")
+    let parent = match content.components().next_back() {
+        Some(Component::Normal(_)) => content.parent().map(Path::to_path_buf),
+        _ => std::fs::canonicalize(content)
+            .ok()
+            .and_then(|dir| dir.parent().map(Path::to_path_buf)),
+    };
+    parent.unwrap_or_default().join("graph.json")
 }
 
+/// Exits 2 if `out` would land in the concept directory, where any file but
+/// `<slug>.mdx` fails the next validation.
+fn refuse_inside(out: &Path, content: &Path) {
+    let parent = match out.parent() {
+        Some(parent) if !parent.as_os_str().is_empty() => parent,
+        _ => Path::new("."),
+    };
+    let (Ok(parent), Ok(content)) = (
+        std::fs::canonicalize(parent),
+        std::fs::canonicalize(content),
+    ) else {
+        return; // a missing output directory fails on write instead
+    };
+    if parent.starts_with(&content) {
+        eprintln!(
+            "{}: inside the concept directory {}; pass --out with a path outside it",
+            out.display(),
+            content.display()
+        );
+        exit(EXIT_IO);
+    }
+}
+
+/// Writes a sibling temp file and renames it over `out`, so an interrupted
+/// build never leaves a truncated `graph.json`.
 fn write_graph(out: &Path, json: &str) {
-    if let Err(err) = std::fs::write(out, json) {
+    let name = out.file_name().unwrap_or(out.as_os_str()).to_string_lossy();
+    let tmp = out.with_file_name(format!(".{name}.tmp"));
+    if let Err(err) = std::fs::write(&tmp, json).and_then(|()| std::fs::rename(&tmp, out)) {
+        let _ = std::fs::remove_file(&tmp);
         eprintln!("{}: cannot write: {err}", out.display());
         exit(EXIT_IO);
     }
@@ -128,8 +165,8 @@ fn check_graph(out: &Path, expected: &str) {
                 &format!("{label} (on disk)")
             )
     );
-    if on_disk.contains('\r') {
-        eprintln!("{label}: has CRLF line endings; graph.json uses LF only");
+    if on_disk.replace("\r\n", "\n") == expected {
+        eprintln!("{label}: differs only in line endings; graph.json uses LF, not CRLF");
     }
     eprintln!("{label}: out of date; run `lexicon build` to regenerate it");
     exit(EXIT_INVALID);

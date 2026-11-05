@@ -60,7 +60,19 @@ struct GraphEdge<'a> {
 ///   prerequisite to the concept, plus every typed edge, sorted by `from`,
 ///   `to` and type name.
 /// - `x`, `y`: see [`layout`], rounded to 4 decimals.
+///
+/// # Panics
+///
+/// If a concept's layer is not in [`LAYERS`]; the loader never returns one.
 pub fn graph_json(concepts: &[Concept]) -> String {
+    for concept in concepts {
+        assert!(
+            LAYERS.iter().any(|&(layer, _)| layer == concept.layer),
+            "{}: layer {} is not in LAYERS",
+            concept.slug,
+            concept.layer
+        );
+    }
     let nodes = concepts
         .iter()
         .zip(layout(concepts))
@@ -221,6 +233,12 @@ mod tests {
             provenance: Provenance::Seed,
             body: String::new(),
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "layer 0")]
+    fn a_layer_outside_layers_panics() {
+        graph_json(&[concept("a", 0, &[])]);
     }
 
     #[test]

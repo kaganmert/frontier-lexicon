@@ -142,3 +142,70 @@ fn check_exits_2_on_a_missing_file() {
     assert!(run.stderr.contains("graph.json"), "{}", run.stderr);
     assert!(!out.exists());
 }
+
+#[test]
+fn the_default_output_of_a_dot_content_dir_is_its_parent() {
+    // `Path::new(".").parent()` is `""`: a lexical parent would put
+    // graph.json inside the concept directory and break the next validate.
+    let tmp = TempDir::new("lexicon-build-dot");
+    let concepts = tmp.path("content/concepts");
+    fs::create_dir_all(&concepts).unwrap();
+    fs::copy(
+        fixture("valid").join("token.mdx"),
+        concepts.join("token.mdx"),
+    )
+    .unwrap();
+
+    let run = lexicon("build", &["--content", "."], Some(&concepts));
+    assert_eq!(run.code, Some(0), "{}", run.stderr);
+    assert!(tmp.path("content/graph.json").is_file());
+    assert!(!concepts.join("graph.json").exists());
+}
+
+#[test]
+fn an_output_inside_the_concept_directory_is_refused() {
+    let tmp = TempDir::new("lexicon-build-inside");
+    let concepts = tmp.path("concepts");
+    fs::create_dir_all(&concepts).unwrap();
+    fs::copy(
+        fixture("valid").join("token.mdx"),
+        concepts.join("token.mdx"),
+    )
+    .unwrap();
+    let out = concepts.join("graph.json");
+
+    let run = lexicon(
+        "build",
+        &[
+            "--content",
+            concepts.to_str().unwrap(),
+            "--out",
+            out.to_str().unwrap(),
+        ],
+        None,
+    );
+    assert_eq!(run.code, Some(2));
+    assert!(run.stderr.contains("concept directory"), "{}", run.stderr);
+    assert!(!out.exists());
+}
+
+#[test]
+fn a_build_leaves_only_graph_json_behind() {
+    let (tmp, _out) = fresh_graph("lexicon-build-no-temp");
+    let names: Vec<_> = fs::read_dir(&tmp.0)
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name())
+        .collect();
+    assert_eq!(names, ["graph.json"]);
+}
+
+#[test]
+fn check_gives_no_line_ending_hint_when_the_content_differs() {
+    let (_tmp, out) = fresh_graph("lexicon-check-stray-cr");
+    let json = fs::read_to_string(&out).unwrap();
+    fs::write(&out, json.replace("\"Fig\"", "\"Fig\r\"")).unwrap();
+
+    let run = build("layout", &out, &["--check"]);
+    assert_eq!(run.code, Some(1));
+    assert!(!run.stderr.contains("CRLF"), "{}", run.stderr);
+}

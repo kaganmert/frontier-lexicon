@@ -121,7 +121,15 @@ cargo run -p lexicon --locked -- build     # validates, then writes content/grap
 ```
 
 `build` refuses to write when validation fails, with the same output and exit
-codes as `validate`. `--content <dir>` and `--out <file>` override the paths.
+codes as `validate`. `--content <dir>` and `--out <file>` override the paths;
+an output inside the concept directory is refused (exit code `2`). The file is
+written to a temporary name and renamed, so an interrupted build never leaves
+it half-written.
+
+The `graph` turbo task is never cached, and no web task depends on it: the
+site must build without Rust (Vercel runs only `next build`). The web tasks
+list `graph.json` as an input instead, and CI keeps the committed file
+current.
 The output is byte-identical for the same content on every platform.
 
 CI runs `cargo run -p lexicon --locked -- build --check`, which writes nothing

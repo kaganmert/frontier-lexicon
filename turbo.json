@@ -43,7 +43,6 @@
     },
     "frontier-lexicon-rust#graph": {
       "command": ["cargo", "run", "-p", "lexicon", "--locked", "--", "build"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"],
       "cache": false
     },
     "web#generate": {
