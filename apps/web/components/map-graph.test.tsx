@@ -45,7 +45,7 @@ describe("MapGraph", () => {
       /<path d="M129.8 102L194.2 186"[^>]*marker-end="url\(#map-arrow\)"/,
     );
     expect(html).toMatch(
-      /<path d="M196 84L220 84"[^>]*stroke-dasharray="[^"]+"[^>]*><title>RELATED_TO<\/title><\/path>/,
+      /<path d="M196 84L220 84"[^>]*stroke-dasharray="[^"]+"[^>]*><title>Token related to Model Context Protocol \(MCP\)<\/title><\/path>/,
     );
   });
 });

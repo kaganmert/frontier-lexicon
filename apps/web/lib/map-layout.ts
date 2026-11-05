@@ -13,6 +13,8 @@ export const GAP = 24;
 export const BAND_HEIGHT = 120;
 export const PADDING = 24;
 export const FONT_SIZE = 12;
+/** Baseline of a band's label, below the band's top edge. */
+export const LABEL_BASELINE = 18;
 export const MAX_TITLE = 20;
 
 /** Horizontal room per node in the widest layer. */

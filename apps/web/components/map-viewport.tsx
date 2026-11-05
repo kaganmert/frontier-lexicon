@@ -61,12 +61,22 @@ export function MapViewport({ width, height, children }: Props) {
     if (clamped === current) return;
     const px = vx ?? el.clientWidth / 2;
     const py = vy ?? el.clientHeight / 2;
-    anchor.current = {
-      x: (el.scrollLeft + px) / current,
-      y: (el.scrollTop + py) / current,
-      vx: px,
-      vy: py,
-    };
+    // A pinch can fire again before the last zoom is laid out; the scroll
+    // position is then stale, so derive the point from the pending anchor.
+    const pending = anchor.current;
+    anchor.current = pending
+      ? {
+          x: pending.x + (px - pending.vx) / current,
+          y: pending.y + (py - pending.vy) / current,
+          vx: px,
+          vy: py,
+        }
+      : {
+          x: (el.scrollLeft + px) / current,
+          y: (el.scrollTop + py) / current,
+          vx: px,
+          vy: py,
+        };
     zoomRef.current = clamped;
     setZoom(clamped);
   }, []);
@@ -167,6 +177,11 @@ export function MapViewport({ width, height, children }: Props) {
         onPointerMove={(event) => {
           const state = drag.current;
           if (!state) return;
+          // Released outside the box before the drag began: no pointerup came.
+          if (event.buttons === 0) {
+            drag.current = null;
+            return;
+          }
           const dx = event.clientX - state.x;
           const dy = event.clientY - state.y;
           const el = event.currentTarget;
@@ -204,7 +219,11 @@ export function MapViewport({ width, height, children }: Props) {
 
   function endDrag(el: HTMLDivElement, pointerId: number) {
     if (drag.current?.moved) {
+      // The click, if any, follows in the same task; a later one is real.
       swallowClick.current = true;
+      setTimeout(() => {
+        swallowClick.current = false;
+      });
       if (el.hasPointerCapture(pointerId)) el.releasePointerCapture(pointerId);
       setDragging(false);
     }

@@ -31,7 +31,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="flex min-h-full flex-col">
+      {/* `overflow-x-clip`: the map's full-bleed `w-screen` wrapper includes the
+          width of an always-visible vertical scrollbar. */}
+      <body className="flex min-h-full flex-col overflow-x-clip">
         <JsonLd data={websiteJsonLd()} />
         <header className="border-b border-border">
           <nav

@@ -1,11 +1,13 @@
 import { conceptPath } from "../lib/concept-model";
-import type { Graph, GraphEdge, GraphNode } from "../lib/graph";
+import type { EdgeType, Graph, GraphEdge, GraphNode } from "../lib/graph";
 import {
   bandTop,
   BAND_HEIGHT,
   edgePath,
   FONT_SIZE,
+  LABEL_BASELINE,
   nodeRect,
+  type NodeRect,
   PADDING,
   size,
   truncateTitle,
@@ -58,7 +60,7 @@ export function MapGraph({ graph }: { graph: Graph }) {
             />
             <text
               x={PADDING}
-              y={bandTop(layer) + 18}
+              y={bandTop(layer) + LABEL_BASELINE}
               className="fill-muted"
             >{`Layer ${layer}: ${name}`}</text>
           </g>
@@ -73,6 +75,8 @@ export function MapGraph({ graph }: { graph: Graph }) {
             <MapEdge
               key={`${edge.from} ${edge.to} ${edge.type}`}
               edge={edge}
+              from={from}
+              to={to}
               d={edgePath(from, to, box)}
             />
           );
@@ -87,14 +91,37 @@ export function MapGraph({ graph }: { graph: Graph }) {
   );
 }
 
-function MapEdge({ edge, d }: { edge: GraphEdge; d: string }) {
+/** Line and node styles, shared by the map and its legend. */
+const PREREQUISITE_STROKE = 1.25;
+const RELATION_DASH = "4 4";
+const DRAFT_DASH = "3 3";
+
+/** Hover text of a dashed edge: plain words, not the `graph.json` type. */
+const relationLabel: Record<Exclude<EdgeType, "PREREQUISITE_OF">, string> = {
+  MEASURES: "measures",
+  MITIGATES: "mitigates",
+  CAUSES: "causes",
+  RELATED_TO: "related to",
+};
+
+function MapEdge({
+  edge,
+  from,
+  to,
+  d,
+}: {
+  edge: GraphEdge;
+  from: GraphNode;
+  to: GraphNode;
+  d: string;
+}) {
   if (edge.type === "PREREQUISITE_OF") {
     return (
       <path
         d={d}
         fill="none"
         className="stroke-muted"
-        strokeWidth={1.25}
+        strokeWidth={PREREQUISITE_STROKE}
         markerEnd="url(#map-arrow)"
       />
     );
@@ -105,22 +132,30 @@ function MapEdge({ edge, d }: { edge: GraphEdge; d: string }) {
       fill="none"
       className="stroke-muted"
       strokeWidth={1}
-      strokeDasharray="4 4"
+      strokeDasharray={RELATION_DASH}
       opacity={0.7}
     >
-      <title>{edge.type}</title>
+      <title>{`${from.title} ${relationLabel[edge.type]} ${to.title}`}</title>
     </path>
   );
 }
 
-function MapNode({
-  node,
-  rect,
-}: {
-  node: GraphNode;
-  rect: ReturnType<typeof nodeRect>;
-}) {
-  const box = (
+const nodeStyle = {
+  published: {
+    rect: "fill-background stroke-accent",
+    dash: undefined,
+    text: "fill-foreground",
+  },
+  draft: {
+    rect: "fill-background stroke-border",
+    dash: DRAFT_DASH,
+    text: "fill-muted",
+  },
+} as const;
+
+function MapNode({ node, rect }: { node: GraphNode; rect: NodeRect }) {
+  const style = nodeStyle[node.status];
+  const shape = (
     <>
       <rect
         x={rect.x}
@@ -128,21 +163,15 @@ function MapNode({
         width={rect.width}
         height={rect.height}
         rx={6}
-        className={
-          node.status === "published"
-            ? "fill-background stroke-accent"
-            : "fill-background stroke-border"
-        }
-        strokeDasharray={node.status === "published" ? undefined : "3 3"}
+        className={style.rect}
+        strokeDasharray={style.dash}
       />
       <text
         x={rect.cx}
         y={rect.cy}
         textAnchor="middle"
         dominantBaseline="central"
-        className={
-          node.status === "published" ? "fill-foreground" : "fill-muted"
-        }
+        className={style.text}
       >
         {truncateTitle(node.title)}
       </text>
@@ -153,14 +182,14 @@ function MapNode({
     return (
       <a data-node={node.slug} href={conceptPath(node.slug)}>
         <title>{node.title}</title>
-        {box}
+        {shape}
       </a>
     );
   }
   return (
     <g data-node={node.slug}>
       <title>{`${node.title}: not published yet`}</title>
-      {box}
+      {shape}
     </g>
   );
 }
@@ -177,7 +206,7 @@ export function MapLegend() {
             x2="26"
             y2="5"
             className="stroke-muted"
-            strokeWidth={1.25}
+            strokeWidth={PREREQUISITE_STROKE}
           />
           <path d="M24 1L32 5L24 9z" className="fill-muted" />
         </svg>
@@ -191,7 +220,7 @@ export function MapLegend() {
             x2="32"
             y2="5"
             className="stroke-muted"
-            strokeDasharray="4 4"
+            strokeDasharray={RELATION_DASH}
           />
         </svg>
         Measures, mitigates, causes or related to
@@ -204,8 +233,8 @@ export function MapLegend() {
             width="30"
             height="12"
             rx="3"
-            className="fill-background stroke-border"
-            strokeDasharray="3 3"
+            className={nodeStyle.draft.rect}
+            strokeDasharray={DRAFT_DASH}
           />
         </svg>
         Not published yet
