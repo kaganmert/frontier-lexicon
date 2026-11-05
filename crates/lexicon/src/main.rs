@@ -1,9 +1,11 @@
+use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::process::exit;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use lexicon_core::{ValidationError, validate_dir};
+use lexicon_core::{ValidationError, graph_json, validate_dir};
+use similar::TextDiff;
 
 #[derive(Parser)]
 #[command(
@@ -25,14 +27,26 @@ enum Command {
         #[arg(long, value_name = "DIR")]
         content: Option<PathBuf>,
     },
-    /// Build graph.json from content files
-    Build,
+    /// Validate, then write graph.json (concepts, edges and map layout)
+    Build {
+        /// Concept directory [default: as for `validate`]
+        #[arg(long, value_name = "DIR")]
+        content: Option<PathBuf>,
+        /// Output file [default: graph.json in the parent of the concept
+        /// directory, so content/graph.json]
+        #[arg(long, value_name = "FILE")]
+        out: Option<PathBuf>,
+        /// Write nothing; exit 1 with a diff if the file is out of date, 2 if
+        /// it is missing
+        #[arg(long)]
+        check: bool,
+    },
 }
 
-/// Exit code for content or graph errors.
+/// Exit code for content or graph errors, and for a stale `graph.json`.
 const EXIT_INVALID: i32 = 1;
-/// Exit code when the concept directory cannot be found or read. Clap also
-/// exits 2, for usage errors.
+/// Exit code when the concept directory cannot be found or read, or
+/// `graph.json` cannot be read or written. Clap also exits 2, for usage errors.
 const EXIT_IO: i32 = 2;
 
 fn main() -> Result<()> {
@@ -48,9 +62,76 @@ fn main() -> Result<()> {
                 Err(err) => fail(&err),
             }
         }
-        Command::Build => println!("build: not implemented yet"),
+        Command::Build {
+            content,
+            out,
+            check,
+        } => {
+            let dir = content.unwrap_or_else(default_content_dir);
+            let out = out.unwrap_or_else(|| default_out(&dir));
+            let concepts = validate_dir(&dir).unwrap_or_else(|err| fail(&err));
+            let json = graph_json(&concepts);
+            if check {
+                check_graph(&out, &json);
+            } else {
+                write_graph(&out, &json);
+            }
+        }
     }
     Ok(())
+}
+
+/// `graph.json` next to the concept directory: `content/graph.json` for
+/// `content/concepts`.
+fn default_out(content: &Path) -> PathBuf {
+    content.parent().unwrap_or(content).join("graph.json")
+}
+
+fn write_graph(out: &Path, json: &str) {
+    if let Err(err) = std::fs::write(out, json) {
+        eprintln!("{}: cannot write: {err}", out.display());
+        exit(EXIT_IO);
+    }
+    println!("wrote {}", out.display());
+}
+
+/// Compares `out` with `expected` byte for byte; on a difference prints a
+/// unified diff (expected → on disk) to stderr and exits 1.
+fn check_graph(out: &Path, expected: &str) {
+    let on_disk = match std::fs::read(out) {
+        Ok(bytes) => bytes,
+        Err(err) => {
+            if err.kind() == ErrorKind::NotFound {
+                eprintln!(
+                    "{}: missing; run `lexicon build` to create it",
+                    out.display()
+                );
+            } else {
+                eprintln!("{}: cannot read: {err}", out.display());
+            }
+            exit(EXIT_IO);
+        }
+    };
+    if on_disk == expected.as_bytes() {
+        println!("{} is up to date", out.display());
+        return;
+    }
+    let on_disk = String::from_utf8_lossy(&on_disk);
+    let label = out.display();
+    eprint!(
+        "{}",
+        TextDiff::from_lines(expected, &on_disk)
+            .unified_diff()
+            .header(
+                &format!("{label} (expected)"),
+                &format!("{label} (on disk)")
+            )
+    );
+    if on_disk.contains('\r') {
+        eprintln!("{label} has CRLF line endings; graph.json uses LF only");
+    }
+    eprintln!("{label} is out of date; run `lexicon build` to regenerate it");
+    exit(EXIT_INVALID);
 }
 
 /// Prints every problem to stderr, one per line, and exits with the matching

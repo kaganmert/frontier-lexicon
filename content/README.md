@@ -105,6 +105,29 @@ directory (`content/concepts/<file>` from the repository root).
 
 CI runs it on every pull request.
 
+## graph.json
+
+`graph.json` is generated from `concepts/` by `lexicon build`; never edit it
+by hand. It holds the ten layers, every concept (drafts included, but only
+slug, title, layer, track, status and map position) and every edge, with
+prerequisites expanded into `PREREQUISITE_OF` edges. The site reads it for the
+map, so it builds without Rust.
+
+Regenerate it after any change to a concept file and commit the result:
+
+```sh
+pnpm exec turbo run graph                  # or, from anywhere in the repository:
+cargo run -p lexicon --locked -- build     # validates, then writes content/graph.json
+```
+
+`build` refuses to write when validation fails, with the same output and exit
+codes as `validate`. `--content <dir>` and `--out <file>` override the paths.
+The output is byte-identical for the same content on every platform.
+
+CI runs `cargo run -p lexicon --locked -- build --check`, which writes nothing
+and fails a pull request whose `graph.json` is out of date: exit code `1` with
+a diff from the expected file to the one on disk, `2` if the file is missing.
+
 ## Provenance
 
 `provenance` records where a concept came from:

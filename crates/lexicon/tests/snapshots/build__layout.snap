@@ -1,0 +1,170 @@
+---
+source: crates/lexicon/tests/build.rs
+expression: json
+---
+{
+  "version": 1,
+  "layers": [
+    {
+      "layer": 1,
+      "name": "Model fundamentals"
+    },
+    {
+      "layer": 2,
+      "name": "Context, requests and cost"
+    },
+    {
+      "layer": 3,
+      "name": "Agents and the work loop"
+    },
+    {
+      "layer": 4,
+      "name": "Integration and permissions"
+    },
+    {
+      "layer": 5,
+      "name": "Sources and failure modes"
+    },
+    {
+      "layer": 6,
+      "name": "Memory and steering"
+    },
+    {
+      "layer": 7,
+      "name": "Shaping the task"
+    },
+    {
+      "layer": 8,
+      "name": "Session renewal and handoff"
+    },
+    {
+      "layer": 9,
+      "name": "Control and ways of working"
+    },
+    {
+      "layer": 10,
+      "name": "Research vocabulary"
+    }
+  ],
+  "nodes": [
+    {
+      "slug": "apple",
+      "title": "Apple",
+      "layer": 1,
+      "track": "shared",
+      "status": "published",
+      "x": 0.75,
+      "y": 0.0
+    },
+    {
+      "slug": "banana",
+      "title": "Banana",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.25,
+      "y": 0.0
+    },
+    {
+      "slug": "cherry",
+      "title": "Cherry",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.1667,
+      "y": 0.1111
+    },
+    {
+      "slug": "date",
+      "title": "Date",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.5,
+      "y": 0.1111
+    },
+    {
+      "slug": "elder",
+      "title": "Elder",
+      "layer": 2,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.8333,
+      "y": 0.1111
+    },
+    {
+      "slug": "fig",
+      "title": "Fig",
+      "layer": 3,
+      "track": "shared",
+      "status": "published",
+      "x": 0.5,
+      "y": 0.2222
+    },
+    {
+      "slug": "grape",
+      "title": "Grape",
+      "layer": 3,
+      "track": "research",
+      "status": "draft",
+      "x": 0.1667,
+      "y": 0.2222
+    },
+    {
+      "slug": "honey",
+      "title": "Honey",
+      "layer": 3,
+      "track": "research",
+      "status": "draft",
+      "x": 0.8333,
+      "y": 0.2222
+    }
+  ],
+  "edges": [
+    {
+      "from": "apple",
+      "to": "date",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "apple",
+      "to": "grape",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "banana",
+      "to": "cherry",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "cherry",
+      "to": "elder",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "cherry",
+      "to": "fig",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "date",
+      "to": "cherry",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "date",
+      "to": "fig",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "elder",
+      "to": "honey",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "fig",
+      "to": "honey",
+      "type": "RELATED_TO"
+    }
+  ]
+}

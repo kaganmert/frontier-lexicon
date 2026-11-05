@@ -41,6 +41,11 @@
       ],
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"]
     },
+    "frontier-lexicon-rust#graph": {
+      "command": ["cargo", "run", "-p", "lexicon", "--locked", "--", "build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"],
+      "cache": false
+    },
     "web#generate": {
       "inputs": [
         "content-collections.ts",
@@ -51,11 +56,20 @@
     },
     "web#build": {
       "dependsOn": ["^build", "check"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/concepts/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/content/concepts/**",
+        "$TURBO_ROOT$/content/graph.json"
+      ],
       "outputs": ["out/**", ".next/**", "!.next/cache/**", "!.next/dev/**"]
     },
     "web#check": {
-      "dependsOn": ["generate"]
+      "dependsOn": ["generate"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/graph.json"]
+    },
+    "web#test": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/content/graph.json"]
     }
   }
 }
