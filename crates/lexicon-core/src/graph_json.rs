@@ -10,7 +10,7 @@ use std::collections::HashMap;
 
 use serde::Serialize;
 
-use crate::{Concept, EdgeType, LAYERS, Status, Track};
+use crate::{Concept, EdgeType, LAYERS, Status, Track, is_layer};
 
 /// Bumped whenever the shape of `graph.json` changes.
 const VERSION: u32 = 1;
@@ -67,7 +67,7 @@ struct GraphEdge<'a> {
 pub fn graph_json(concepts: &[Concept]) -> String {
     for concept in concepts {
         assert!(
-            LAYERS.iter().any(|&(layer, _)| layer == concept.layer),
+            is_layer(concept.layer),
             "{}: layer {} is not in LAYERS",
             concept.slug,
             concept.layer

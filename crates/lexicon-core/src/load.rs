@@ -9,7 +9,7 @@ use serde_saphyr::{SnippetMode, render_options};
 use url::Url;
 
 use crate::concept::{Concept, FrontMatter};
-use crate::{EdgeType, front_matter, is_valid_slug};
+use crate::{EdgeType, LAYERS, front_matter, is_layer, is_valid_slug};
 
 const MAX_DESCRIPTION: usize = 160;
 
@@ -295,10 +295,11 @@ fn check(p: &mut Problems, fm: &FrontMatter, file_slug: &str) {
             ),
         );
     }
-    if !(1..=10).contains(&fm.layer) {
+    if !is_layer(fm.layer) {
+        let (first, last) = (LAYERS[0].0, LAYERS[LAYERS.len() - 1].0);
         p.field_error(
             "layer",
-            format!("must be between 1 and 10 (got {})", fm.layer),
+            format!("must be between {first} and {last} (got {})", fm.layer),
         );
     }
     p.single_line("question", &fm.question);

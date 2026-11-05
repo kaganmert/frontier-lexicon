@@ -1,4 +1,4 @@
-use std::io::ErrorKind;
+use std::io::{ErrorKind, Write};
 use std::path::{Component, Path, PathBuf};
 use std::process::exit;
 
@@ -70,7 +70,7 @@ fn main() -> Result<()> {
             let dir = content.unwrap_or_else(default_content_dir);
             let concepts = validate_dir(&dir).unwrap_or_else(|err| fail(&err));
             let out = out.unwrap_or_else(|| default_out(&dir));
-            refuse_inside(&out, &dir);
+            check_out_dir(&out, &dir);
             let json = graph_json(&concepts);
             if check {
                 check_graph(&out, &json);
@@ -96,18 +96,25 @@ fn default_out(content: &Path) -> PathBuf {
     parent.unwrap_or_default().join("graph.json")
 }
 
-/// Exits 2 if `out` would land in the concept directory, where any file but
-/// `<slug>.mdx` fails the next validation.
-fn refuse_inside(out: &Path, content: &Path) {
+/// Exits 2 if the directory `out` goes in does not exist, or is the concept
+/// directory (or below it), where any file but `<slug>.mdx` fails the next
+/// validation.
+fn check_out_dir(out: &Path, content: &Path) {
     let parent = match out.parent() {
         Some(parent) if !parent.as_os_str().is_empty() => parent,
         _ => Path::new("."),
     };
-    let (Ok(parent), Ok(content)) = (
-        std::fs::canonicalize(parent),
-        std::fs::canonicalize(content),
-    ) else {
-        return; // a missing output directory fails on write instead
+    let parent = std::fs::canonicalize(parent).unwrap_or_else(|err| {
+        if err.kind() == ErrorKind::NotFound {
+            eprintln!("{}: no such directory", parent.display());
+        } else {
+            eprintln!("{}: cannot read: {err}", parent.display());
+        }
+        exit(EXIT_IO);
+    });
+    // Validation has just read it, so it resolves.
+    let Ok(content) = std::fs::canonicalize(content) else {
+        return;
     };
     if parent.starts_with(&content) {
         eprintln!(
@@ -119,12 +126,17 @@ fn refuse_inside(out: &Path, content: &Path) {
     }
 }
 
-/// Writes a sibling temp file and renames it over `out`, so an interrupted
-/// build never leaves a truncated `graph.json`.
+/// Writes a sibling temp file, flushes it to disk and renames it over `out`,
+/// so neither an interrupted build nor a crash leaves a truncated
+/// `graph.json`. The process ID keeps concurrent builds apart.
 fn write_graph(out: &Path, json: &str) {
     let name = out.file_name().unwrap_or(out.as_os_str()).to_string_lossy();
-    let tmp = out.with_file_name(format!(".{name}.tmp"));
-    if let Err(err) = std::fs::write(&tmp, json).and_then(|()| std::fs::rename(&tmp, out)) {
+    let tmp = out.with_file_name(format!(".{name}.{}.tmp", std::process::id()));
+    let written = std::fs::File::create(&tmp).and_then(|mut file| {
+        file.write_all(json.as_bytes())?;
+        file.sync_all()
+    });
+    if let Err(err) = written.and_then(|()| std::fs::rename(&tmp, out)) {
         let _ = std::fs::remove_file(&tmp);
         eprintln!("{}: cannot write: {err}", out.display());
         exit(EXIT_IO);
@@ -133,8 +145,9 @@ fn write_graph(out: &Path, json: &str) {
 }
 
 /// Compares `out` with `expected` byte for byte; on a difference prints a
-/// unified diff (expected → on disk) to stderr and exits 1. A missing or
-/// unreadable file exits 2.
+/// unified diff (expected → on disk), or a one-line hint when only the line
+/// endings differ, to stderr and exits 1. A missing or unreadable file exits
+/// 2.
 fn check_graph(out: &Path, expected: &str) {
     let on_disk = match std::fs::read(out) {
         Ok(bytes) => bytes,
@@ -156,6 +169,12 @@ fn check_graph(out: &Path, expected: &str) {
     }
     let on_disk = String::from_utf8_lossy(&on_disk);
     let label = out.display();
+    if on_disk.replace("\r\n", "\n") == expected {
+        eprintln!(
+            "{label}: differs only in line endings; graph.json uses LF, not CRLF (see .gitattributes)"
+        );
+        exit(EXIT_INVALID);
+    }
     eprint!(
         "{}",
         TextDiff::from_lines(expected, &on_disk)
@@ -165,9 +184,6 @@ fn check_graph(out: &Path, expected: &str) {
                 &format!("{label} (on disk)")
             )
     );
-    if on_disk.replace("\r\n", "\n") == expected {
-        eprintln!("{label}: differs only in line endings; graph.json uses LF, not CRLF");
-    }
     eprintln!("{label}: out of date; run `lexicon build` to regenerate it");
     exit(EXIT_INVALID);
 }

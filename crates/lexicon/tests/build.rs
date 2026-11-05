@@ -131,6 +131,8 @@ fn check_flags_crlf_line_endings() {
     let run = build("layout", &out, &["--check"]);
     assert_eq!(run.code, Some(1));
     assert!(run.stderr.contains("CRLF"), "{}", run.stderr);
+    // A diff of every line would bury the hint.
+    assert!(!run.stderr.contains("(expected)"), "{}", run.stderr);
 }
 
 #[test]
@@ -208,4 +210,14 @@ fn check_gives_no_line_ending_hint_when_the_content_differs() {
     let run = build("layout", &out, &["--check"]);
     assert_eq!(run.code, Some(1));
     assert!(!run.stderr.contains("CRLF"), "{}", run.stderr);
+}
+
+#[test]
+fn check_names_a_missing_output_directory() {
+    let tmp = TempDir::new("lexicon-check-no-dir");
+    let out = tmp.path("missing/graph.json");
+    let run = build("layout", &out, &["--check"]);
+    assert_eq!(run.code, Some(2));
+    assert!(run.stderr.contains("no such directory"), "{}", run.stderr);
+    assert!(!run.stderr.contains("lexicon build"), "{}", run.stderr);
 }

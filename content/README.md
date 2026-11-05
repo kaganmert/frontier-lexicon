@@ -122,9 +122,10 @@ cargo run -p lexicon --locked -- build     # validates, then writes content/grap
 
 `build` refuses to write when validation fails, with the same output and exit
 codes as `validate`. `--content <dir>` and `--out <file>` override the paths;
-an output inside the concept directory is refused (exit code `2`). The file is
-written to a temporary name and renamed, so an interrupted build never leaves
-it half-written.
+an output inside the concept directory, or in a directory that does not exist,
+is refused (exit code `2`). The file is written under a temporary name,
+flushed to disk and renamed, so neither an interrupted build nor a crash
+leaves it half-written.
 
 The `graph` turbo task is never cached, and no web task depends on it: the
 site must build without Rust (Vercel runs only `next build`). The web tasks

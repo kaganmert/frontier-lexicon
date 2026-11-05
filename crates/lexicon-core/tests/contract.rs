@@ -81,3 +81,25 @@ fn statuses_match_the_web_side() {
         .collect();
     assert_eq!(rust, web);
 }
+
+#[test]
+fn layer_names_match_the_web_side() {
+    let site = repo_file("apps/web/lib/site.ts");
+    let web: Vec<(u8, String)> = between(
+        &site,
+        "export const layerNames: Record<number, string> = {",
+        "};",
+    )
+    .lines()
+    .filter_map(|line| line.trim().strip_suffix(','))
+    .map(|entry| {
+        let (layer, name) = entry.split_once(": ").unwrap();
+        (layer.parse().unwrap(), name.trim_matches('"').to_owned())
+    })
+    .collect();
+    let rust: Vec<(u8, String)> = lexicon_core::LAYERS
+        .iter()
+        .map(|&(layer, name)| (layer, name.to_owned()))
+        .collect();
+    assert_eq!(rust, web);
+}

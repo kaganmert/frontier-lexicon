@@ -59,6 +59,12 @@ pub const LAYERS: [(u8, &str); 10] = [
     (10, "Research vocabulary"),
 ];
 
+/// Whether `layer` is one of [`LAYERS`]: the loader rejects any other, and
+/// [`graph_json`] refuses one, so the rule lives here once.
+pub(crate) fn is_layer(layer: u8) -> bool {
+    LAYERS.iter().any(|&(known, _)| known == layer)
+}
+
 /// Which audience a concept belongs to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
