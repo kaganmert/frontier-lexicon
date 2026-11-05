@@ -5,6 +5,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
   conceptMarkdownPath,
+  publishedOnly,
   slugPattern,
   type Concept,
 } from "./lib/concept-model";
@@ -55,7 +56,8 @@ function packageRoot(): string {
 }
 
 /**
- * Every lesson is also published as plain Markdown at `/concepts/<slug>/index.md`.
+ * Every published lesson is also available as plain Markdown at
+ * `/concepts/<slug>/index.md`; drafts get no file.
  * Static export cannot emit a dynamic route handler when there are no concepts,
  * so the files are written into `public/` (which Next copies verbatim into
  * `out/`) instead. `public/concepts/` is generated and git-ignored.
@@ -63,7 +65,7 @@ function packageRoot(): string {
 async function writeMarkdownAlternates(documents: Concept[]) {
   const publicDir = path.join(packageRoot(), "public");
   await rm(path.join(publicDir, "concepts"), { recursive: true, force: true });
-  for (const concept of documents) {
+  for (const concept of publishedOnly(documents)) {
     const file = path.join(publicDir, conceptMarkdownPath(concept.slug));
     await mkdir(path.dirname(file), { recursive: true });
     await writeFile(file, conceptToMarkdown(concept), "utf8");

@@ -1,5 +1,5 @@
 import { allConcepts } from "content-collections";
-import { sortConcepts, type Concept } from "./concept-model";
+import { publishedOnly, sortConcepts, type Concept } from "./concept-model";
 
 export type { Concept, ConceptSummary } from "./concept-model";
 export {
@@ -11,14 +11,22 @@ export {
   groupByTrack,
 } from "./concept-model";
 
-/** The collection is fixed at build time, so sort and index it once. */
-const concepts: readonly Concept[] = sortConcepts(allConcepts);
-const bySlug = new Map(concepts.map((concept) => [concept.slug, concept]));
+/**
+ * The collection is fixed at build time, so filter, sort and index it once.
+ * Every page and route reads concepts through this module, and it exposes no
+ * unfiltered accessor, so no draft page, OG image, sitemap or llms entry is
+ * ever built. (The `.md` alternates are written before Next runs, in
+ * `content-collections.ts`, with the same `publishedOnly` filter.)
+ */
+const published: readonly Concept[] = publishedOnly(sortConcepts(allConcepts));
+const bySlug = new Map(published.map((concept) => [concept.slug, concept]));
 
-export function getConcepts(): readonly Concept[] {
-  return concepts;
+/** Published concepts in canonical order. */
+export function getPublishedConcepts(): readonly Concept[] {
+  return published;
 }
 
+/** A published concept, or `undefined` for a draft or unknown slug. */
 export function getConcept(slug: string): Concept | undefined {
   return bySlug.get(slug);
 }

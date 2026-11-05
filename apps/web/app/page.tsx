@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { conceptsIndexPath, getConcepts } from "@/lib/concepts";
+import { conceptsIndexPath, getPublishedConcepts } from "@/lib/concepts";
 import { OG_SITE, ogImageMeta, openGraphBase } from "@/lib/og";
 import { siteDescription, siteName } from "@/lib/site";
 
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  const concepts = getConcepts();
+  const concepts = getPublishedConcepts();
   return (
     <>
       <h1 className="text-3xl font-semibold tracking-tight">{siteName}</h1>

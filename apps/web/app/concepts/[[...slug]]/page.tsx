@@ -9,7 +9,7 @@ import {
   conceptPath,
   conceptsIndexPath,
   getConcept,
-  getConcepts,
+  getPublishedConcepts,
   groupByLayer,
   groupByTrack,
   type Concept,
@@ -30,7 +30,10 @@ import { absoluteUrl, layerHeading, trackLabel } from "@/lib/site";
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return [{ slug: [] }, ...getConcepts().map(({ slug }) => ({ slug: [slug] }))];
+  return [
+    { slug: [] },
+    ...getPublishedConcepts().map(({ slug }) => ({ slug: [slug] })),
+  ];
 }
 
 const indexMetadata: Metadata = {
@@ -99,7 +102,7 @@ export default async function ConceptsRoute({
 }
 
 function ConceptIndex() {
-  const concepts = getConcepts();
+  const concepts = getPublishedConcepts();
 
   return (
     <>
