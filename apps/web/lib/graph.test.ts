@@ -25,13 +25,6 @@ describe("graph", () => {
       Object.entries(layerNames).map(([layer, name]) => [Number(layer), name]),
     );
   });
-
-  it("has an endpoint node for every edge", () => {
-    const slugs = new Set(graph.nodes.map((node) => node.slug));
-    for (const edge of graph.edges) {
-      expect(slugs.has(edge.from) && slugs.has(edge.to)).toBe(true);
-    }
-  });
 });
 
 describe("parseGraph", () => {
@@ -52,5 +45,31 @@ describe("parseGraph", () => {
       edges: [{ from: "token", to: "ghost", type: "RELATED_TO" }],
     };
     expect(() => parseGraph(bad)).toThrow(/ghost/);
+  });
+
+  it("rejects an edge from a node to itself", () => {
+    const bad = {
+      ...valid,
+      edges: [{ from: "token", to: "token", type: "RELATED_TO" }],
+    };
+    expect(() => parseGraph(bad)).toThrow(/itself[\s\S]*edges\[0\]/);
+  });
+
+  it("rejects layers that are not numbered 1, 2, 3, … in order", () => {
+    const bad = {
+      ...valid,
+      layers: [...valid.layers, { layer: 3, name: "Agents and the work loop" }],
+    };
+    expect(() => parseGraph(bad)).toThrow(/layers\[1\]\.layer/);
+  });
+
+  it("rejects a node in a layer the file does not list", () => {
+    const bad = { ...valid, nodes: [{ ...valid.nodes[0], layer: 2 }] };
+    expect(() => parseGraph(bad)).toThrow(/nodes\[0\]\.layer/);
+  });
+
+  it("rejects two nodes with the same slug", () => {
+    const bad = { ...valid, nodes: [valid.nodes[0], valid.nodes[0]] };
+    expect(() => parseGraph(bad)).toThrow(/nodes\[1\]\.slug/);
   });
 });

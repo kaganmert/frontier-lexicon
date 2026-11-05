@@ -30,7 +30,7 @@ export const graphSchema = z
       z.object({
         slug: z.string().min(1),
         title: z.string().min(1),
-        layer: z.number().int().min(1).max(10),
+        layer: z.number().int().min(1),
         track: z.enum(tracks),
         status: z.enum(statuses),
         x: unit,
@@ -45,8 +45,36 @@ export const graphSchema = z
       }),
     ),
   })
+  // What `lexicon-core` guarantees and the map relies on: bands are placed by
+  // layer number, nodes are keyed by slug, and an edge needs two ends.
   .superRefine((graph, ctx) => {
-    const slugs = new Set(graph.nodes.map((node) => node.slug));
+    graph.layers.forEach(({ layer }, i) => {
+      if (layer !== i + 1) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["layers", i, "layer"],
+          message: `expected layer ${i + 1}: layers are numbered 1, 2, 3, … in order`,
+        });
+      }
+    });
+    const slugs = new Set<string>();
+    graph.nodes.forEach((node, i) => {
+      if (node.layer > graph.layers.length) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["nodes", i, "layer"],
+          message: `layer ${node.layer} is not in "layers"`,
+        });
+      }
+      if (slugs.has(node.slug)) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["nodes", i, "slug"],
+          message: `"${node.slug}" is not unique`,
+        });
+      }
+      slugs.add(node.slug);
+    });
     graph.edges.forEach((edge, i) => {
       for (const end of ["from", "to"] as const) {
         if (!slugs.has(edge[end])) {
@@ -56,6 +84,13 @@ export const graphSchema = z
             message: `"${edge[end]}" is not a node`,
           });
         }
+      }
+      if (edge.from === edge.to) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["edges", i],
+          message: `"${edge.from}" has an edge to itself`,
+        });
       }
     });
   });

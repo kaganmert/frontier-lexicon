@@ -31,9 +31,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      {/* `overflow-x-clip`: the map's full-bleed `w-screen` wrapper includes the
-          width of an always-visible vertical scrollbar. */}
-      <body className="flex min-h-full flex-col overflow-x-clip">
+      {/* A full-bleed `w-screen` element (the map) is as wide as the window
+          including an always-visible vertical scrollbar, so it would scroll the
+          page sideways. Clip only on pages that have one: elsewhere a wide
+          table or code block must still scroll. */}
+      <body className="flex min-h-full flex-col has-[[data-full-bleed]]:overflow-x-clip">
         <JsonLd data={websiteJsonLd()} />
         <header className="border-b border-border">
           <nav

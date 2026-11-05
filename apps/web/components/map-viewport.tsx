@@ -14,11 +14,13 @@ const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 2;
 const BUTTON_STEP = 1.25;
 /**
- * Wheel `deltaY` per e-fold of zoom. A trackpad pinch sends many small deltas
- * and zooms smoothly; a mouse wheel tick (`deltaY` around 100) would jump, so
- * each event is capped at one button step.
+ * Wheel `deltaY`, in pixels, per e-fold of zoom. A trackpad pinch sends many
+ * small deltas and zooms smoothly; a mouse wheel tick (`deltaY` around 100)
+ * would jump, so each event is capped at one button step.
  */
 const WHEEL_SCALE = 100;
+/** Pixels per line for `deltaMode` 1, which Firefox uses for mouse wheels. */
+const LINE_HEIGHT = 16;
 /** Mouse travel before a press becomes a drag, so clicks on links still work. */
 const DRAG_THRESHOLD = 4;
 
@@ -101,12 +103,9 @@ export function MapViewport({ width, height, children }: Props) {
       if (!event.ctrlKey) return;
       event.preventDefault();
       const box = el.getBoundingClientRect();
-      const factor = Math.min(
-        BUTTON_STEP,
-        Math.max(1 / BUTTON_STEP, Math.exp(-event.deltaY / WHEEL_SCALE)),
-      );
       zoomTo(
-        zoomRef.current * factor,
+        zoomRef.current *
+          wheelZoomFactor(event.deltaY, event.deltaMode, el.clientHeight),
         event.clientX - box.left,
         event.clientY - box.top,
       );
@@ -161,11 +160,22 @@ export function MapViewport({ width, height, children }: Props) {
         tabIndex={0}
         role="region"
         aria-label="Concept map, scrollable"
+        // The root layout clips sideways overflow on pages with this (`w-screen`).
+        data-full-bleed
         className={`mx-[calc(50%-50vw)] max-h-[85vh] w-screen overflow-auto border-y border-border select-none ${dragging ? "cursor-grabbing" : "cursor-grab"}`}
         onPointerDown={(event) => {
           swallowClick.current = false;
           if (event.pointerType !== "mouse" || event.button !== 0) return;
           const el = event.currentTarget;
+          // A press on a scrollbar is the browser's; dragging the thumb as
+          // well would scroll the other way.
+          const box = el.getBoundingClientRect();
+          if (
+            event.clientX - box.left - el.clientLeft >= el.clientWidth ||
+            event.clientY - box.top - el.clientTop >= el.clientHeight
+          ) {
+            return;
+          }
           drag.current = {
             x: event.clientX,
             y: event.clientY,
@@ -229,6 +239,27 @@ export function MapViewport({ width, height, children }: Props) {
     }
     drag.current = null;
   }
+}
+
+/**
+ * Zoom factor for one `ctrl` + wheel event: `deltaY` in pixels (lines and
+ * pages converted by `deltaMode`), capped at one button step either way.
+ */
+export function wheelZoomFactor(
+  deltaY: number,
+  deltaMode: number,
+  pageHeight: number,
+): number {
+  const pixels =
+    deltaMode === 1
+      ? deltaY * LINE_HEIGHT
+      : deltaMode === 2
+        ? deltaY * pageHeight
+        : deltaY;
+  return Math.min(
+    BUTTON_STEP,
+    Math.max(1 / BUTTON_STEP, Math.exp(-pixels / WHEEL_SCALE)),
+  );
 }
 
 function noSubscription() {

@@ -1,9 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { mapFixture } from "../lib/map-fixture";
+import { layoutMap } from "../lib/map-layout";
 import { MapGraph, MapLegend } from "./map-graph";
 
-const html = renderToStaticMarkup(<MapGraph graph={mapFixture} />);
+const html = renderToStaticMarkup(<MapGraph layout={layoutMap(mapFixture)} />);
 const count = (needle: string) => html.split(needle).length - 1;
 
 describe("MapGraph", () => {
@@ -45,7 +46,7 @@ describe("MapGraph", () => {
       /<path d="M129.8 102L194.2 186"[^>]*marker-end="url\(#map-arrow\)"/,
     );
     expect(html).toMatch(
-      /<path d="M196 84L220 84"[^>]*stroke-dasharray="[^"]+"[^>]*><title>Token related to Model Context Protocol \(MCP\)<\/title><\/path>/,
+      /<path d="M156 102C156 118 260 118 260 102"[^>]*stroke-dasharray="[^"]+"[^>]*><title>Token related to Model Context Protocol \(MCP\)<\/title><\/path>/,
     );
   });
 });

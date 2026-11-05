@@ -1,35 +1,34 @@
 import { conceptPath } from "../lib/concept-model";
-import type { EdgeType, Graph, GraphEdge, GraphNode } from "../lib/graph";
+import type { EdgeType, GraphEdge, GraphNode } from "../lib/graph";
 import {
   bandTop,
   BAND_HEIGHT,
-  edgePath,
   FONT_SIZE,
   LABEL_BASELINE,
-  nodeRect,
+  type MapLayout,
   type NodeRect,
   PADDING,
-  size,
   truncateTitle,
 } from "../lib/map-layout";
+import { layerHeading } from "../lib/site";
 
 /**
- * The concept map as plain SVG, rendered on the server. No `next/*` imports,
- * so it also renders under `react-dom/server` in Vitest. Published nodes are
- * ordinary SVG links; `next/link` would drop the trailing slash outside a
- * router and buys nothing here.
+ * The concept map as plain SVG, rendered on the server from `layoutMap`
+ * (computed once by the page, which also sizes the viewport from it). No
+ * `next/*` imports, so it also renders under `react-dom/server` in Vitest.
+ * Published nodes are ordinary SVG links; `next/link` would drop the trailing
+ * slash outside a router and buys nothing here.
  */
-export function MapGraph({ graph }: { graph: Graph }) {
-  const box = size(graph);
-  const bySlug = new Map(graph.nodes.map((node) => [node.slug, node]));
+export function MapGraph({ layout }: { layout: MapLayout }) {
+  const { W, H } = layout.size;
 
   return (
     <svg
       role="group"
       aria-label="Concept map"
-      viewBox={`0 0 ${box.W} ${box.H}`}
-      width={box.W}
-      height={box.H}
+      viewBox={`0 0 ${W} ${H}`}
+      width={W}
+      height={H}
       fontSize={FONT_SIZE}
       className="block"
     >
@@ -47,12 +46,12 @@ export function MapGraph({ graph }: { graph: Graph }) {
         </marker>
       </defs>
       <g>
-        {graph.layers.map(({ layer, name }) => (
+        {layout.layers.map((layer) => (
           <g key={layer}>
             <rect
               x={0}
               y={bandTop(layer)}
-              width={box.W}
+              width={W}
               height={BAND_HEIGHT}
               className={
                 layer % 2 === 0 ? "fill-foreground/[0.03]" : "fill-transparent"
@@ -62,29 +61,26 @@ export function MapGraph({ graph }: { graph: Graph }) {
               x={PADDING}
               y={bandTop(layer) + LABEL_BASELINE}
               className="fill-muted"
-            >{`Layer ${layer}: ${name}`}</text>
+            >
+              {layerHeading(layer)}
+            </text>
           </g>
         ))}
       </g>
       <g>
-        {graph.edges.map((edge) => {
-          const from = bySlug.get(edge.from);
-          const to = bySlug.get(edge.to);
-          if (!from || !to) return null;
-          return (
-            <MapEdge
-              key={`${edge.from} ${edge.to} ${edge.type}`}
-              edge={edge}
-              from={from}
-              to={to}
-              d={edgePath(from, to, box)}
-            />
-          );
-        })}
+        {layout.edges.map(({ edge, from, to, d }) => (
+          <MapEdge
+            key={`${edge.from} ${edge.to} ${edge.type}`}
+            edge={edge}
+            from={from}
+            to={to}
+            d={d}
+          />
+        ))}
       </g>
       <g>
-        {graph.nodes.map((node) => (
-          <MapNode key={node.slug} node={node} rect={nodeRect(node, box)} />
+        {layout.nodes.map(({ node, rect }) => (
+          <MapNode key={node.slug} node={node} rect={rect} />
         ))}
       </g>
     </svg>
