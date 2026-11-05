@@ -1,6 +1,6 @@
 ---
 title: "Context reset"
-description: "Ending a session and starting a new one with an empty context, so the next request carries none of the old conversation."
+description: "Discarding everything a conversation has accumulated, for example with /clear, so the next request is answered as if the work had just begun."
 layer: 8
 track: coding
 status: draft
@@ -8,7 +8,6 @@ question: "When is starting over faster than continuing?"
 aliases:
   - "clearing"
   - "/clear"
-  - "fresh session"
 prerequisites:
   - session
   - context-window
