@@ -1,0 +1,17 @@
+---
+title: "Non-determinism"
+description: "Why repeated runs of one prompt can diverge: sampling picks among likely tokens, and batched GPU arithmetic is not bit-for-bit reproducible."
+layer: 1
+track: shared
+status: draft
+question: "Why can't you get the exact same answer twice, even with the same prompt?"
+prerequisites:
+  - temperature
+edges:
+  - type: RELATED_TO
+    to: inference
+sources:
+  - title: "Defeating Nondeterminism in LLM Inference (Thinking Machines Lab, 2025)"
+    url: "https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/"
+provenance: seed
+---

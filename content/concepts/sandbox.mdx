@@ -1,0 +1,17 @@
+---
+title: "Sandbox"
+description: "An OS-enforced boundary around the commands an agent runs: it limits which files they can write and which network hosts they can reach."
+layer: 4
+track: coding
+status: draft
+question: "How can you let an agent run commands without trusting it with your machine?"
+prerequisites:
+  - environment
+edges:
+  - type: MITIGATES
+    to: prompt-injection
+sources:
+  - title: "Claude Code docs: Sandboxing"
+    url: "https://code.claude.com/docs/en/sandboxing"
+provenance: seed
+---

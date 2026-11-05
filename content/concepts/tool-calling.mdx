@@ -1,0 +1,21 @@
+---
+title: "Tool calling"
+description: "A model asks the program around it to run a named function with arguments, then reads the returned result in its next step."
+layer: 3
+track: shared
+status: draft
+question: "How does a model that only produces text end up reading files or querying a database?"
+aliases:
+  - "tool use"
+  - "function calling"
+  - "tool call"
+prerequisites:
+  - next-token-prediction
+  - context
+sources:
+  - title: "Claude docs: Tool use"
+    url: "https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview"
+  - title: "Toolformer (Schick et al., 2023)"
+    url: "https://arxiv.org/abs/2302.04761"
+provenance: seed
+---
