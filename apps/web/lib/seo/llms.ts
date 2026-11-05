@@ -7,7 +7,13 @@ import {
   type Concept,
   type ConceptSummary,
 } from "../concept-model";
-import { absoluteUrl, layerHeading, siteDescription, siteName } from "../site";
+import {
+  absoluteUrl,
+  layerHeading,
+  mapPath,
+  siteDescription,
+  siteName,
+} from "../site";
 import { conceptToMarkdown } from "./markdown";
 
 const EMPTY_STATE = "No concepts have been published yet.";
@@ -47,6 +53,7 @@ export function buildLlmsTxt(concepts: readonly ConceptSummary[]): string {
       "## Optional",
       "",
       `- [Concept index](${absoluteUrl(conceptsIndexPath)}): every concept on one page`,
+      `- [Concept map](${absoluteUrl(mapPath)}): every concept and edge as one layered diagram, drafts included`,
       `- [Full content](${absoluteUrl("/llms-full.txt")}): all concept pages as one Markdown file`,
     ].join("\n"),
   );

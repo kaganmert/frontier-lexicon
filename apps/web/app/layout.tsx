@@ -4,7 +4,7 @@ import { JsonLd } from "@/components/json-ld";
 import { conceptsIndexPath } from "@/lib/concept-model";
 import { websiteJsonLd } from "@/lib/seo/jsonld";
 import { OG_SITE, ogImageMeta, openGraphBase } from "@/lib/og";
-import { siteDescription, siteName, siteUrl } from "@/lib/site";
+import { mapPath, siteDescription, siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -31,7 +31,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="flex min-h-full flex-col">
+      {/* A full-bleed `w-screen` element (the map) is as wide as the window
+          including an always-visible vertical scrollbar, so it would scroll the
+          page sideways. Clip only on pages that have one: elsewhere a wide
+          table or code block must still scroll. */}
+      <body className="flex min-h-full flex-col has-[[data-full-bleed]]:overflow-x-clip">
         <JsonLd data={websiteJsonLd()} />
         <header className="border-b border-border">
           <nav
@@ -42,6 +46,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               {siteName}
             </Link>
             <ul className="flex gap-4 text-sm">
+              <li>
+                <Link href={mapPath}>Map</Link>
+              </li>
               <li>
                 <Link href={conceptsIndexPath}>Concepts</Link>
               </li>

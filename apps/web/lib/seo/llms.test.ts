@@ -20,10 +20,10 @@ describe("buildLlmsTxt", () => {
     expect(txt.indexOf("## Layer 2")).toBeLessThan(txt.indexOf("## Layer 5"));
   });
 
-  it("ends with an Optional section pointing at the index and the full dump", () => {
+  it("ends with an Optional section pointing at the index, the map and the full dump", () => {
     const txt = buildLlmsTxt([contextWindow]);
     expect(txt).toContain(
-      "## Optional\n\n- [Concept index](https://lexicon.kaganmert.com/concepts/): every concept on one page\n- [Full content](https://lexicon.kaganmert.com/llms-full.txt): all concept pages as one Markdown file\n",
+      "## Optional\n\n- [Concept index](https://lexicon.kaganmert.com/concepts/): every concept on one page\n- [Concept map](https://lexicon.kaganmert.com/map/): every concept and edge as one layered diagram, drafts included\n- [Full content](https://lexicon.kaganmert.com/llms-full.txt): all concept pages as one Markdown file\n",
     );
     expect(txt.endsWith("\n")).toBe(true);
   });

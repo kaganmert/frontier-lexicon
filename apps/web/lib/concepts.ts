@@ -13,9 +13,10 @@ export {
 
 /**
  * The collection is fixed at build time, so filter, sort and index it once.
- * Every page and route reads concepts through this module, and it exposes no
- * unfiltered accessor, so no draft page, OG image, sitemap or llms entry is
- * ever built. (The `.md` alternates are written before Next runs, in
+ * Every page and route reads concept documents through this module, and it
+ * exposes no unfiltered accessor, so no draft page, OG image, sitemap or llms
+ * entry is ever built. (The map reads `graph.json` through `lib/graph.ts`:
+ * titles only, no draft text.) (The `.md` alternates are written before Next runs, in
  * `content-collections.ts`, with the same `publishedOnly` filter.)
  */
 const published: readonly Concept[] = publishedOnly(sortConcepts(allConcepts));
