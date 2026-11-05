@@ -33,6 +33,7 @@ cargo fmt --all --check
 cargo lint   # alias for clippy, see .cargo/config.toml
 cargo test --workspace --locked
 cargo run -p lexicon --locked -- validate   # schema and graph rules over content/concepts
+cargo run -p lexicon --locked -- build --check   # content/graph.json is up to date
 ```
 
 Concept files under `content/` are not Prettier-checked; their shape is owned

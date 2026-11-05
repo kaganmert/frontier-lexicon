@@ -1,52 +1,11 @@
-use std::path::{Path, PathBuf};
+mod common;
 
-use assert_cmd::Command;
+use std::path::Path;
 
-fn fixture(case: &str) -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("tests/fixtures")
-        .join(case)
-}
-
-struct Run {
-    code: Option<i32>,
-    stdout: String,
-    stderr_lines: Vec<String>,
-}
+use common::{Run, TempDir, fixture, lexicon};
 
 fn validate(args: &[&str], cwd: Option<&Path>) -> Run {
-    let mut cmd = Command::cargo_bin("lexicon").unwrap();
-    cmd.arg("validate").args(args);
-    if let Some(cwd) = cwd {
-        cmd.current_dir(cwd);
-    }
-    let output = cmd.output().unwrap();
-    Run {
-        code: output.status.code(),
-        stdout: String::from_utf8(output.stdout).unwrap(),
-        stderr_lines: String::from_utf8(output.stderr)
-            .unwrap()
-            .lines()
-            .map(str::to_owned)
-            .collect(),
-    }
-}
-
-/// A scratch directory removed on drop, so a failing test leaves nothing behind.
-struct TempDir(PathBuf);
-
-impl TempDir {
-    fn new(name: &str) -> Self {
-        let dir = std::env::temp_dir().join(format!("{name}-{}", std::process::id()));
-        std::fs::create_dir_all(&dir).unwrap();
-        TempDir(dir)
-    }
-}
-
-impl Drop for TempDir {
-    fn drop(&mut self) {
-        let _ = std::fs::remove_dir_all(&self.0);
-    }
+    lexicon("validate", args, cwd)
 }
 
 fn validate_fixture(case: &str) -> Run {

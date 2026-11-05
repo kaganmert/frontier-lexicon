@@ -9,3 +9,5 @@ target/
 .vercel/
 docs/
 AGENTS.md
+# Left by an interrupted `lexicon build` (see content/README.md).
+.*.tmp

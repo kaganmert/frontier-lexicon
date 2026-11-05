@@ -21,3 +21,5 @@ serde-saphyr = { version = "2.1", default-features = false, features = ["deseria
 url = "2.5"
 petgraph = { version = "0.8", default-features = false, features = ["std", "graphmap"] }
 assert_cmd = "2.2"
+insta = "1.49"
+similar = "2.7"

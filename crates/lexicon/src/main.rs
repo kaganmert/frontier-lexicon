@@ -1,9 +1,11 @@
-use std::path::{Path, PathBuf};
+use std::io::{ErrorKind, Write};
+use std::path::{Component, Path, PathBuf};
 use std::process::exit;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use lexicon_core::{ValidationError, validate_dir};
+use lexicon_core::{ValidationError, graph_json, validate_dir};
+use similar::TextDiff;
 
 #[derive(Parser)]
 #[command(
@@ -25,14 +27,26 @@ enum Command {
         #[arg(long, value_name = "DIR")]
         content: Option<PathBuf>,
     },
-    /// Build graph.json from content files
-    Build,
+    /// Validate, then write graph.json (concepts, edges and map layout)
+    Build {
+        /// Concept directory [default: as for `validate`]
+        #[arg(long, value_name = "DIR")]
+        content: Option<PathBuf>,
+        /// Output file [default: graph.json in the parent of the concept
+        /// directory, so content/graph.json]
+        #[arg(long, value_name = "FILE")]
+        out: Option<PathBuf>,
+        /// Write nothing; exit 1 with a diff if the file is out of date, 2 if
+        /// it is missing or unreadable
+        #[arg(long)]
+        check: bool,
+    },
 }
 
-/// Exit code for content or graph errors.
+/// Exit code for content or graph errors, and for a stale `graph.json`.
 const EXIT_INVALID: i32 = 1;
-/// Exit code when the concept directory cannot be found or read. Clap also
-/// exits 2, for usage errors.
+/// Exit code when the concept directory cannot be found or read, or
+/// `graph.json` cannot be read or written. Clap also exits 2, for usage errors.
 const EXIT_IO: i32 = 2;
 
 fn main() -> Result<()> {
@@ -48,9 +62,130 @@ fn main() -> Result<()> {
                 Err(err) => fail(&err),
             }
         }
-        Command::Build => println!("build: not implemented yet"),
+        Command::Build {
+            content,
+            out,
+            check,
+        } => {
+            let dir = content.unwrap_or_else(default_content_dir);
+            let concepts = validate_dir(&dir).unwrap_or_else(|err| fail(&err));
+            let out = out.unwrap_or_else(|| default_out(&dir));
+            check_out_dir(&out, &dir);
+            let json = graph_json(&concepts);
+            if check {
+                check_graph(&out, &json);
+            } else {
+                write_graph(&out, &json);
+            }
+        }
     }
     Ok(())
+}
+
+/// `graph.json` next to the concept directory: `content/graph.json` for
+/// `content/concepts`. When the path does not end in a directory name (`.`,
+/// `..`, `/`), its lexical parent is not the real one, so the directory is
+/// resolved first; it exists, since validation just read it.
+fn default_out(content: &Path) -> PathBuf {
+    let parent = match content.components().next_back() {
+        Some(Component::Normal(_)) => content.parent().map(Path::to_path_buf),
+        _ => std::fs::canonicalize(content)
+            .ok()
+            .and_then(|dir| dir.parent().map(Path::to_path_buf)),
+    };
+    parent.unwrap_or_default().join("graph.json")
+}
+
+/// Exits 2 if the directory `out` goes in does not exist, or is the concept
+/// directory (or below it), where any file but `<slug>.mdx` fails the next
+/// validation.
+fn check_out_dir(out: &Path, content: &Path) {
+    let parent = match out.parent() {
+        Some(parent) if !parent.as_os_str().is_empty() => parent,
+        _ => Path::new("."),
+    };
+    let parent = std::fs::canonicalize(parent).unwrap_or_else(|err| {
+        if err.kind() == ErrorKind::NotFound {
+            eprintln!("{}: no such directory", parent.display());
+        } else {
+            eprintln!("{}: cannot read: {err}", parent.display());
+        }
+        exit(EXIT_IO);
+    });
+    // Validation has just read it, so it resolves.
+    let Ok(content) = std::fs::canonicalize(content) else {
+        return;
+    };
+    if parent.starts_with(&content) {
+        eprintln!(
+            "{}: inside the concept directory {}; pass --out with a path outside it",
+            out.display(),
+            content.display()
+        );
+        exit(EXIT_IO);
+    }
+}
+
+/// Writes a sibling temp file, flushes it to disk and renames it over `out`,
+/// so neither an interrupted build nor a crash leaves a truncated
+/// `graph.json`. The process ID keeps concurrent builds apart.
+fn write_graph(out: &Path, json: &str) {
+    let name = out.file_name().unwrap_or(out.as_os_str()).to_string_lossy();
+    let tmp = out.with_file_name(format!(".{name}.{}.tmp", std::process::id()));
+    let written = std::fs::File::create(&tmp).and_then(|mut file| {
+        file.write_all(json.as_bytes())?;
+        file.sync_all()
+    });
+    if let Err(err) = written.and_then(|()| std::fs::rename(&tmp, out)) {
+        let _ = std::fs::remove_file(&tmp);
+        eprintln!("{}: cannot write: {err}", out.display());
+        exit(EXIT_IO);
+    }
+    println!("wrote {}", out.display());
+}
+
+/// Compares `out` with `expected` byte for byte; on a difference prints a
+/// unified diff (expected → on disk), or a one-line hint when only the line
+/// endings differ, to stderr and exits 1. A missing or unreadable file exits
+/// 2.
+fn check_graph(out: &Path, expected: &str) {
+    let on_disk = match std::fs::read(out) {
+        Ok(bytes) => bytes,
+        Err(err) => {
+            if err.kind() == ErrorKind::NotFound {
+                eprintln!(
+                    "{}: missing; run `lexicon build` to create it",
+                    out.display()
+                );
+            } else {
+                eprintln!("{}: cannot read: {err}", out.display());
+            }
+            exit(EXIT_IO);
+        }
+    };
+    if on_disk == expected.as_bytes() {
+        println!("{} is up to date", out.display());
+        return;
+    }
+    let on_disk = String::from_utf8_lossy(&on_disk);
+    let label = out.display();
+    if on_disk.replace("\r\n", "\n") == expected {
+        eprintln!(
+            "{label}: differs only in line endings; graph.json uses LF, not CRLF (see .gitattributes)"
+        );
+        exit(EXIT_INVALID);
+    }
+    eprint!(
+        "{}",
+        TextDiff::from_lines(expected, &on_disk)
+            .unified_diff()
+            .header(
+                &format!("{label} (expected)"),
+                &format!("{label} (on disk)")
+            )
+    );
+    eprintln!("{label}: out of date; run `lexicon build` to regenerate it");
+    exit(EXIT_INVALID);
 }
 
 /// Prints every problem to stderr, one per line, and exits with the matching

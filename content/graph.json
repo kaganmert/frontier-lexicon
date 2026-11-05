@@ -1,0 +1,1390 @@
+{
+  "version": 1,
+  "layers": [
+    {
+      "layer": 1,
+      "name": "Model fundamentals"
+    },
+    {
+      "layer": 2,
+      "name": "Context, requests and cost"
+    },
+    {
+      "layer": 3,
+      "name": "Agents and the work loop"
+    },
+    {
+      "layer": 4,
+      "name": "Integration and permissions"
+    },
+    {
+      "layer": 5,
+      "name": "Sources and failure modes"
+    },
+    {
+      "layer": 6,
+      "name": "Memory and steering"
+    },
+    {
+      "layer": 7,
+      "name": "Shaping the task"
+    },
+    {
+      "layer": 8,
+      "name": "Session renewal and handoff"
+    },
+    {
+      "layer": 9,
+      "name": "Control and ways of working"
+    },
+    {
+      "layer": 10,
+      "name": "Research vocabulary"
+    }
+  ],
+  "nodes": [
+    {
+      "slug": "attention",
+      "title": "Attention",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.125,
+      "y": 0.0
+    },
+    {
+      "slug": "chain-of-thought",
+      "title": "Chain of thought",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.0417,
+      "y": 0.0
+    },
+    {
+      "slug": "embedding",
+      "title": "Embedding",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.2083,
+      "y": 0.0
+    },
+    {
+      "slug": "inference",
+      "title": "Inference",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.2917,
+      "y": 0.0
+    },
+    {
+      "slug": "model",
+      "title": "Model",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.4583,
+      "y": 0.0
+    },
+    {
+      "slug": "next-token-prediction",
+      "title": "Next-token prediction",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.375,
+      "y": 0.0
+    },
+    {
+      "slug": "non-determinism",
+      "title": "Non-determinism",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.5417,
+      "y": 0.0
+    },
+    {
+      "slug": "parameters",
+      "title": "Parameters",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.625,
+      "y": 0.0
+    },
+    {
+      "slug": "temperature",
+      "title": "Temperature",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.7917,
+      "y": 0.0
+    },
+    {
+      "slug": "token",
+      "title": "Token",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.7083,
+      "y": 0.0
+    },
+    {
+      "slug": "training",
+      "title": "Training",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.875,
+      "y": 0.0
+    },
+    {
+      "slug": "transformer",
+      "title": "Transformer",
+      "layer": 1,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.9583,
+      "y": 0.0
+    },
+    {
+      "slug": "attention-budget",
+      "title": "Attention budget",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.125,
+      "y": 0.1111
+    },
+    {
+      "slug": "context",
+      "title": "Context",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.4583,
+      "y": 0.1111
+    },
+    {
+      "slug": "context-window",
+      "title": "Context window",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.2083,
+      "y": 0.1111
+    },
+    {
+      "slug": "input-tokens",
+      "title": "Input tokens",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.2917,
+      "y": 0.1111
+    },
+    {
+      "slug": "model-provider",
+      "title": "Model provider",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.375,
+      "y": 0.1111
+    },
+    {
+      "slug": "output-tokens",
+      "title": "Output tokens",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.5417,
+      "y": 0.1111
+    },
+    {
+      "slug": "prompt-caching",
+      "title": "Prompt caching",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.625,
+      "y": 0.1111
+    },
+    {
+      "slug": "provider-request",
+      "title": "Provider request",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.7917,
+      "y": 0.1111
+    },
+    {
+      "slug": "reasoning-effort",
+      "title": "Reasoning effort",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.0417,
+      "y": 0.1111
+    },
+    {
+      "slug": "session",
+      "title": "Session",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.875,
+      "y": 0.1111
+    },
+    {
+      "slug": "stateless",
+      "title": "Statelessness",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.9583,
+      "y": 0.1111
+    },
+    {
+      "slug": "system-prompt",
+      "title": "System prompt",
+      "layer": 2,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.7083,
+      "y": 0.1111
+    },
+    {
+      "slug": "agent",
+      "title": "Agent",
+      "layer": 3,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.0714,
+      "y": 0.2222
+    },
+    {
+      "slug": "agentic-loop",
+      "title": "Agentic loop",
+      "layer": 3,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.2143,
+      "y": 0.2222
+    },
+    {
+      "slug": "tool-calling",
+      "title": "Tool calling",
+      "layer": 3,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.3571,
+      "y": 0.2222
+    },
+    {
+      "slug": "turn",
+      "title": "Turn",
+      "layer": 3,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.9286,
+      "y": 0.2222
+    },
+    {
+      "slug": "environment",
+      "title": "Environment",
+      "layer": 3,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.5,
+      "y": 0.2222
+    },
+    {
+      "slug": "filesystem",
+      "title": "Filesystem",
+      "layer": 3,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.6429,
+      "y": 0.2222
+    },
+    {
+      "slug": "harness",
+      "title": "Harness",
+      "layer": 3,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.7857,
+      "y": 0.2222
+    },
+    {
+      "slug": "model-context-protocol",
+      "title": "Model Context Protocol",
+      "layer": 4,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.1,
+      "y": 0.3333
+    },
+    {
+      "slug": "agent-mode",
+      "title": "Agent mode",
+      "layer": 4,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.9,
+      "y": 0.3333
+    },
+    {
+      "slug": "permission-mode",
+      "title": "Permission mode",
+      "layer": 4,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.3,
+      "y": 0.3333
+    },
+    {
+      "slug": "permission-request",
+      "title": "Permission request",
+      "layer": 4,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.7,
+      "y": 0.3333
+    },
+    {
+      "slug": "sandbox",
+      "title": "Sandbox",
+      "layer": 4,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.5,
+      "y": 0.3333
+    },
+    {
+      "slug": "context-rot",
+      "title": "Context rot",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.15,
+      "y": 0.4444
+    },
+    {
+      "slug": "contextual-knowledge",
+      "title": "Contextual knowledge",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.65,
+      "y": 0.4444
+    },
+    {
+      "slug": "hallucination",
+      "title": "Hallucination",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.45,
+      "y": 0.4444
+    },
+    {
+      "slug": "knowledge-cutoff",
+      "title": "Knowledge cutoff",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.25,
+      "y": 0.4444
+    },
+    {
+      "slug": "lost-in-the-middle",
+      "title": "Lost in the middle",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.05,
+      "y": 0.4444
+    },
+    {
+      "slug": "parametric-knowledge",
+      "title": "Parametric knowledge",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.85,
+      "y": 0.4444
+    },
+    {
+      "slug": "primary-source",
+      "title": "Primary source",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.55,
+      "y": 0.4444
+    },
+    {
+      "slug": "prompt-injection",
+      "title": "Prompt injection",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.35,
+      "y": 0.4444
+    },
+    {
+      "slug": "secondary-source",
+      "title": "Secondary source",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.75,
+      "y": 0.4444
+    },
+    {
+      "slug": "sycophancy",
+      "title": "Sycophancy",
+      "layer": 5,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.95,
+      "y": 0.4444
+    },
+    {
+      "slug": "agent-memory",
+      "title": "Agent memory",
+      "layer": 6,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.4167,
+      "y": 0.5556
+    },
+    {
+      "slug": "context-engineering",
+      "title": "Context engineering",
+      "layer": 6,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.25,
+      "y": 0.5556
+    },
+    {
+      "slug": "agent-skill",
+      "title": "Agent skill",
+      "layer": 6,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.0833,
+      "y": 0.5556
+    },
+    {
+      "slug": "agents-md",
+      "title": "AGENTS.md",
+      "layer": 6,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.9167,
+      "y": 0.5556
+    },
+    {
+      "slug": "progressive-disclosure",
+      "title": "Progressive disclosure",
+      "layer": 6,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.5833,
+      "y": 0.5556
+    },
+    {
+      "slug": "subagent",
+      "title": "Subagent",
+      "layer": 6,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.75,
+      "y": 0.5556
+    },
+    {
+      "slug": "design-concept",
+      "title": "Design concept",
+      "layer": 7,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.5,
+      "y": 0.6667
+    },
+    {
+      "slug": "prototyping",
+      "title": "Prototyping",
+      "layer": 7,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.1,
+      "y": 0.6667
+    },
+    {
+      "slug": "requirements-interview",
+      "title": "Requirements interview",
+      "layer": 7,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.7,
+      "y": 0.6667
+    },
+    {
+      "slug": "spec",
+      "title": "Spec",
+      "layer": 7,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.9,
+      "y": 0.6667
+    },
+    {
+      "slug": "ticket",
+      "title": "Ticket",
+      "layer": 7,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.3,
+      "y": 0.6667
+    },
+    {
+      "slug": "compaction",
+      "title": "Compaction",
+      "layer": 8,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.5,
+      "y": 0.7778
+    },
+    {
+      "slug": "context-reset",
+      "title": "Context reset",
+      "layer": 8,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.1667,
+      "y": 0.7778
+    },
+    {
+      "slug": "handoff",
+      "title": "Handoff",
+      "layer": 8,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.8333,
+      "y": 0.7778
+    },
+    {
+      "slug": "human-in-the-loop",
+      "title": "Human in the loop",
+      "layer": 9,
+      "track": "shared",
+      "status": "draft",
+      "x": 0.8333,
+      "y": 0.8889
+    },
+    {
+      "slug": "agent-experience",
+      "title": "Agent experience",
+      "layer": 9,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.9444,
+      "y": 0.8889
+    },
+    {
+      "slug": "ai-code-review",
+      "title": "AI code review",
+      "layer": 9,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.1667,
+      "y": 0.8889
+    },
+    {
+      "slug": "automated-check",
+      "title": "Automated check",
+      "layer": 9,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.3889,
+      "y": 0.8889
+    },
+    {
+      "slug": "developer-experience",
+      "title": "Developer experience",
+      "layer": 9,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.5,
+      "y": 0.8889
+    },
+    {
+      "slug": "human-code-review",
+      "title": "Human code review",
+      "layer": 9,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.7222,
+      "y": 0.8889
+    },
+    {
+      "slug": "software-factory",
+      "title": "Software factory",
+      "layer": 9,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.0556,
+      "y": 0.8889
+    },
+    {
+      "slug": "unattended-run",
+      "title": "Unattended run",
+      "layer": 9,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.6111,
+      "y": 0.8889
+    },
+    {
+      "slug": "vibe-coding",
+      "title": "Vibe coding",
+      "layer": 9,
+      "track": "coding",
+      "status": "draft",
+      "x": 0.2778,
+      "y": 0.8889
+    },
+    {
+      "slug": "alignment",
+      "title": "Alignment",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.75,
+      "y": 1.0
+    },
+    {
+      "slug": "constitutional-ai",
+      "title": "Constitutional AI",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.15,
+      "y": 1.0
+    },
+    {
+      "slug": "cot-faithfulness",
+      "title": "Chain-of-thought faithfulness",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.05,
+      "y": 1.0
+    },
+    {
+      "slug": "emergent-abilities",
+      "title": "Emergent abilities",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.25,
+      "y": 1.0
+    },
+    {
+      "slug": "evals",
+      "title": "Evals",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.45,
+      "y": 1.0
+    },
+    {
+      "slug": "interpretability",
+      "title": "Interpretability",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.95,
+      "y": 1.0
+    },
+    {
+      "slug": "red-teaming",
+      "title": "Red teaming",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.35,
+      "y": 1.0
+    },
+    {
+      "slug": "reward-hacking",
+      "title": "Reward hacking",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.55,
+      "y": 1.0
+    },
+    {
+      "slug": "rlhf",
+      "title": "RLHF",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.65,
+      "y": 1.0
+    },
+    {
+      "slug": "scaling-laws",
+      "title": "Scaling laws",
+      "layer": 10,
+      "track": "research",
+      "status": "draft",
+      "x": 0.85,
+      "y": 1.0
+    }
+  ],
+  "edges": [
+    {
+      "from": "agent",
+      "to": "harness",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "agent-mode",
+      "to": "permission-mode",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "agentic-loop",
+      "to": "agent",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "agentic-loop",
+      "to": "turn",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "agents-md",
+      "to": "agent-experience",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "agents-md",
+      "to": "agent-memory",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "agents-md",
+      "to": "agent-skill",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "alignment",
+      "to": "rlhf",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "attention",
+      "to": "attention-budget",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "attention",
+      "to": "lost-in-the-middle",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "attention",
+      "to": "transformer",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "attention-budget",
+      "to": "context-rot",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "automated-check",
+      "to": "developer-experience",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "automated-check",
+      "to": "hallucination",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "automated-check",
+      "to": "human-code-review",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "chain-of-thought",
+      "to": "cot-faithfulness",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "chain-of-thought",
+      "to": "reasoning-effort",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "compaction",
+      "to": "context-rot",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "context",
+      "to": "context-window",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context",
+      "to": "design-concept",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context",
+      "to": "tool-calling",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context-engineering",
+      "to": "progressive-disclosure",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context-engineering",
+      "to": "subagent",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context-reset",
+      "to": "context-rot",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "context-reset",
+      "to": "handoff",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context-rot",
+      "to": "context-engineering",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context-rot",
+      "to": "context-reset",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context-rot",
+      "to": "ticket",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context-window",
+      "to": "attention-budget",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context-window",
+      "to": "compaction",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "context-window",
+      "to": "lost-in-the-middle",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "contextual-knowledge",
+      "to": "knowledge-cutoff",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "contextual-knowledge",
+      "to": "primary-source",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "contextual-knowledge",
+      "to": "prompt-injection",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "design-concept",
+      "to": "prototyping",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "design-concept",
+      "to": "spec",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "developer-experience",
+      "to": "agent-experience",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "embedding",
+      "to": "attention",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "environment",
+      "to": "automated-check",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "environment",
+      "to": "filesystem",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "environment",
+      "to": "sandbox",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "evals",
+      "to": "emergent-abilities",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "evals",
+      "to": "hallucination",
+      "type": "MEASURES"
+    },
+    {
+      "from": "evals",
+      "to": "red-teaming",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "filesystem",
+      "to": "progressive-disclosure",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "handoff",
+      "to": "spec",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "handoff",
+      "to": "ticket",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "harness",
+      "to": "agent-mode",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "harness",
+      "to": "agents-md",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "harness",
+      "to": "compaction",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "harness",
+      "to": "environment",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "harness",
+      "to": "permission-request",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "harness",
+      "to": "subagent",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "human-code-review",
+      "to": "ai-code-review",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "human-code-review",
+      "to": "software-factory",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "human-code-review",
+      "to": "vibe-coding",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "human-in-the-loop",
+      "to": "permission-request",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "inference",
+      "to": "model-provider",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "input-tokens",
+      "to": "output-tokens",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "input-tokens",
+      "to": "prompt-caching",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "interpretability",
+      "to": "cot-faithfulness",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "lost-in-the-middle",
+      "to": "context-rot",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "model",
+      "to": "evals",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "model",
+      "to": "inference",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "model",
+      "to": "next-token-prediction",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "model-provider",
+      "to": "provider-request",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "next-token-prediction",
+      "to": "chain-of-thought",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "next-token-prediction",
+      "to": "hallucination",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "next-token-prediction",
+      "to": "output-tokens",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "next-token-prediction",
+      "to": "temperature",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "next-token-prediction",
+      "to": "tool-calling",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "non-determinism",
+      "to": "inference",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "output-tokens",
+      "to": "reasoning-effort",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "parameters",
+      "to": "model",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "parameters",
+      "to": "training",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "parameters",
+      "to": "transformer",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "parametric-knowledge",
+      "to": "contextual-knowledge",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "parametric-knowledge",
+      "to": "hallucination",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "parametric-knowledge",
+      "to": "knowledge-cutoff",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "permission-request",
+      "to": "permission-mode",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "permission-request",
+      "to": "unattended-run",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "primary-source",
+      "to": "secondary-source",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "progressive-disclosure",
+      "to": "agent-skill",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "progressive-disclosure",
+      "to": "context-rot",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "prompt-injection",
+      "to": "red-teaming",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "prototyping",
+      "to": "vibe-coding",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "provider-request",
+      "to": "contextual-knowledge",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "provider-request",
+      "to": "output-tokens",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "provider-request",
+      "to": "stateless",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "provider-request",
+      "to": "system-prompt",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "reward-hacking",
+      "to": "automated-check",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "rlhf",
+      "to": "constitutional-ai",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "rlhf",
+      "to": "reward-hacking",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "rlhf",
+      "to": "sycophancy",
+      "type": "CAUSES"
+    },
+    {
+      "from": "sandbox",
+      "to": "prompt-injection",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "scaling-laws",
+      "to": "emergent-abilities",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "secondary-source",
+      "to": "handoff",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "session",
+      "to": "agent-memory",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "session",
+      "to": "spec",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "session",
+      "to": "turn",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "stateless",
+      "to": "input-tokens",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "stateless",
+      "to": "session",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "subagent",
+      "to": "context-rot",
+      "type": "MITIGATES"
+    },
+    {
+      "from": "sycophancy",
+      "to": "hallucination",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "system-prompt",
+      "to": "agents-md",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "system-prompt",
+      "to": "context-engineering",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "temperature",
+      "to": "non-determinism",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "ticket",
+      "to": "software-factory",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "ticket",
+      "to": "unattended-run",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "token",
+      "to": "context",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "token",
+      "to": "embedding",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "token",
+      "to": "next-token-prediction",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "token",
+      "to": "provider-request",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "tool-calling",
+      "to": "agent-memory",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "tool-calling",
+      "to": "agentic-loop",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "tool-calling",
+      "to": "model-context-protocol",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "tool-calling",
+      "to": "prompt-injection",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "training",
+      "to": "alignment",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "training",
+      "to": "inference",
+      "type": "RELATED_TO"
+    },
+    {
+      "from": "training",
+      "to": "parametric-knowledge",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "training",
+      "to": "scaling-laws",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "training",
+      "to": "sycophancy",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "transformer",
+      "to": "interpretability",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "turn",
+      "to": "human-in-the-loop",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "turn",
+      "to": "requirements-interview",
+      "type": "PREREQUISITE_OF"
+    },
+    {
+      "from": "unattended-run",
+      "to": "human-in-the-loop",
+      "type": "RELATED_TO"
+    }
+  ]
+}

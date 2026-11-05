@@ -5,7 +5,8 @@
 //! rules that span concepts ([`validate_graph`]): references resolve, nothing
 //! references itself or repeats an edge, no `PREREQUISITE_OF` edge points from
 //! a higher layer to a lower one, and the prerequisite subgraph has no cycles.
-//! [`validate_dir`] runs both.
+//! [`validate_dir`] runs both. [`graph_json`] turns a valid set into the
+//! committed `content/graph.json`, with a fixed layout for the site's map.
 //!
 //! Both sets of rules are documented for authors in `content/README.md`.
 //!
@@ -29,6 +30,7 @@
 mod concept;
 mod front_matter;
 mod graph;
+mod graph_json;
 mod load;
 mod slug;
 mod validate;
@@ -37,9 +39,31 @@ use serde::{Deserialize, Serialize};
 
 pub use concept::{Concept, Edge, Provenance, Source, Status};
 pub use graph::{GraphError, validate_graph};
+pub use graph_json::graph_json;
 pub use load::{ContentError, LoadError, load_concepts};
 pub use slug::is_valid_slug;
 pub use validate::{ValidationError, validate_dir};
+
+/// Layer numbers and names, as `layerNames` in `apps/web/lib/site.ts` spells
+/// them. `graph.json` carries all ten.
+pub const LAYERS: [(u8, &str); 10] = [
+    (1, "Model fundamentals"),
+    (2, "Context, requests and cost"),
+    (3, "Agents and the work loop"),
+    (4, "Integration and permissions"),
+    (5, "Sources and failure modes"),
+    (6, "Memory and steering"),
+    (7, "Shaping the task"),
+    (8, "Session renewal and handoff"),
+    (9, "Control and ways of working"),
+    (10, "Research vocabulary"),
+];
+
+/// Whether `layer` is one of [`LAYERS`]: the loader rejects any other, and
+/// [`graph_json`] refuses one, so the rule lives here once.
+pub(crate) fn is_layer(layer: u8) -> bool {
+    LAYERS.iter().any(|&(known, _)| known == layer)
+}
 
 /// Which audience a concept belongs to.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

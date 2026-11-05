@@ -78,3 +78,8 @@ jobs:
 
       # Schema and graph rules over content/concepts (see content/README.md).
       - run: cargo run -p lexicon --locked -- validate
+
+      # content/graph.json is committed; fails with a diff if it is stale.
+      # Validation runs again inside `build`; the separate step above keeps
+      # its failures readable on their own.
+      - run: cargo run -p lexicon --locked -- build --check
