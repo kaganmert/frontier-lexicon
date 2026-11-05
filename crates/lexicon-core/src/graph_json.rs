@@ -107,13 +107,16 @@ pub fn graph_json(concepts: &[Concept]) -> String {
     json
 }
 
+/// Divisor for `y`: layer 1 sits at `y = 0`, the last layer at `y = 1`.
+const LAST_LAYER: f64 = (LAYERS.len() - 1) as f64;
+
 fn round4(value: f64) -> f64 {
     (value * 1e4).round() / 1e4
 }
 
 /// Normalised `(x, y)` in `[0, 1]` per concept, in the order of `concepts`.
 ///
-/// `y = (layer - 1) / 9`. Within a layer, nodes sit at `x = (rank + 0.5) / n`,
+/// `y = (layer - 1) / 9`, so layer 1 is at the top. Within a layer, nodes sit at `x = (rank + 0.5) / n`,
 /// first in input order. One downward sweep (layers 2 to 10) then reorders
 /// each layer by the mean `x` of each node's prerequisites in lower layers,
 /// and one upward sweep (layers 9 to 1) by the mean `x` of the concepts in
@@ -161,27 +164,27 @@ fn layout(concepts: &[Concept]) -> Vec<(f64, f64)> {
     concepts
         .iter()
         .enumerate()
-        .map(|(i, concept)| (x[i], f64::from(concept.layer - 1) / 9.0))
+        .map(|(i, concept)| (x[i], f64::from(concept.layer - 1) / LAST_LAYER))
         .collect()
 }
 
 /// Sorts `row` by the mean `x` of each node's `neighbours`, then places it.
 fn reorder(row: &mut [usize], neighbours: &[Vec<usize>], x: &mut [f64], concepts: &[Concept]) {
-    let key: HashMap<usize, f64> = row
+    let barycenter: HashMap<usize, f64> = row
         .iter()
         .map(|&i| {
-            let around = &neighbours[i];
-            let key = if around.is_empty() {
+            let adjacent = &neighbours[i];
+            let mean = if adjacent.is_empty() {
                 x[i]
             } else {
-                around.iter().map(|&j| x[j]).sum::<f64>() / around.len() as f64
+                adjacent.iter().map(|&j| x[j]).sum::<f64>() / adjacent.len() as f64
             };
-            (i, key)
+            (i, mean)
         })
         .collect();
     row.sort_by(|&a, &b| {
-        key[&a]
-            .total_cmp(&key[&b])
+        barycenter[&a]
+            .total_cmp(&barycenter[&b])
             .then_with(|| concepts[a].track.rank().cmp(&concepts[b].track.rank()))
             .then_with(|| concepts[a].slug.cmp(&concepts[b].slug))
     });

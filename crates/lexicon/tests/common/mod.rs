@@ -16,26 +16,24 @@ pub struct Run {
     pub code: Option<i32>,
     pub stdout: String,
     pub stderr: String,
+    pub stderr_lines: Vec<String>,
 }
 
-impl Run {
-    pub fn stderr_lines(&self) -> Vec<String> {
-        self.stderr.lines().map(str::to_owned).collect()
-    }
-}
-
-/// Runs `lexicon <args>` in `cwd` (the test's own directory if `None`).
-pub fn lexicon<S: AsRef<std::ffi::OsStr>>(args: &[S], cwd: Option<&Path>) -> Run {
+/// Runs `lexicon <subcommand> <args>` in `cwd` (the test's own directory if
+/// `None`).
+pub fn lexicon(subcommand: &str, args: &[&str], cwd: Option<&Path>) -> Run {
     let mut cmd = Command::cargo_bin("lexicon").unwrap();
-    cmd.args(args);
+    cmd.arg(subcommand).args(args);
     if let Some(cwd) = cwd {
         cmd.current_dir(cwd);
     }
     let output = cmd.output().unwrap();
+    let stderr = String::from_utf8(output.stderr).unwrap();
     Run {
         code: output.status.code(),
         stdout: String::from_utf8(output.stdout).unwrap(),
-        stderr: String::from_utf8(output.stderr).unwrap(),
+        stderr_lines: stderr.lines().map(str::to_owned).collect(),
+        stderr,
     }
 }
 

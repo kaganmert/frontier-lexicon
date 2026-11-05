@@ -2,23 +2,10 @@ mod common;
 
 use std::path::Path;
 
-use common::{TempDir, fixture, lexicon};
-
-struct Run {
-    code: Option<i32>,
-    stdout: String,
-    stderr_lines: Vec<String>,
-}
+use common::{Run, TempDir, fixture, lexicon};
 
 fn validate(args: &[&str], cwd: Option<&Path>) -> Run {
-    let mut full = vec!["validate"];
-    full.extend_from_slice(args);
-    let run = lexicon(&full, cwd);
-    Run {
-        stderr_lines: run.stderr_lines(),
-        code: run.code,
-        stdout: run.stdout,
-    }
+    lexicon("validate", args, cwd)
 }
 
 fn validate_fixture(case: &str) -> Run {

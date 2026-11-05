@@ -110,8 +110,8 @@ CI runs it on every pull request.
 `graph.json` is generated from `concepts/` by `lexicon build`; never edit it
 by hand. It holds the ten layers, every concept (drafts included, but only
 slug, title, layer, track, status and map position) and every edge, with
-prerequisites expanded into `PREREQUISITE_OF` edges. The site reads it for the
-map, so it builds without Rust.
+prerequisites expanded into `PREREQUISITE_OF` edges. It is committed so the
+site's map (FLN-09) can read it without Rust at build time.
 
 Regenerate it after any change to a concept file and commit the result:
 
@@ -126,7 +126,8 @@ The output is byte-identical for the same content on every platform.
 
 CI runs `cargo run -p lexicon --locked -- build --check`, which writes nothing
 and fails a pull request whose `graph.json` is out of date: exit code `1` with
-a diff from the expected file to the one on disk, `2` if the file is missing.
+a diff from the expected file to the one on disk, `2` if the file is missing
+or unreadable.
 
 ## Provenance
 

@@ -8,18 +8,17 @@ use common::{TempDir, fixture, lexicon};
 fn build(case: &str, out: &std::path::Path, extra: &[&str]) -> common::Run {
     let content = fixture(case);
     let mut args = vec![
-        "build",
         "--content",
         content.to_str().unwrap(),
         "--out",
         out.to_str().unwrap(),
     ];
     args.extend_from_slice(extra);
-    lexicon(&args, None)
+    lexicon("build", &args, None)
 }
 
 /// A fresh `graph.json` of the layout fixture in its own temp directory.
-fn built(name: &str) -> (TempDir, std::path::PathBuf) {
+fn fresh_graph(name: &str) -> (TempDir, std::path::PathBuf) {
     let tmp = TempDir::new(name);
     let out = tmp.path("graph.json");
     let run = build("layout", &out, &[]);
@@ -31,7 +30,7 @@ fn built(name: &str) -> (TempDir, std::path::PathBuf) {
 fn layout_fixture_snapshot() {
     // Layers 1–2 start crossed (cherry needs banana, date needs apple, both in
     // loader order); the sweeps uncross them.
-    let (_tmp, out) = built("lexicon-build-snapshot");
+    let (_tmp, out) = fresh_graph("lexicon-build-snapshot");
     let json = fs::read_to_string(&out).unwrap();
     assert!(json.ends_with("}\n") && !json.ends_with("\n\n"));
     insta::assert_snapshot!("layout", json);
@@ -39,8 +38,8 @@ fn layout_fixture_snapshot() {
 
 #[test]
 fn two_builds_are_byte_identical() {
-    let (_a, first) = built("lexicon-build-twice-a");
-    let (_b, second) = built("lexicon-build-twice-b");
+    let (_a, first) = fresh_graph("lexicon-build-twice-a");
+    let (_b, second) = fresh_graph("lexicon-build-twice-b");
     assert_eq!(fs::read(first).unwrap(), fs::read(second).unwrap());
 }
 
@@ -55,7 +54,7 @@ fn the_default_output_sits_next_to_the_concept_directory() {
     )
     .unwrap();
 
-    let run = lexicon(&["build", "--content", concepts.to_str().unwrap()], None);
+    let run = lexicon("build", &["--content", concepts.to_str().unwrap()], None);
     assert_eq!(run.code, Some(0), "{}", run.stderr);
     assert!(tmp.path("content/graph.json").is_file());
 }
@@ -66,20 +65,20 @@ fn invalid_content_is_reported_like_validate_and_nothing_is_written() {
     let out = tmp.path("graph.json");
     let run = build("graph-errors", &out, &[]);
     assert_eq!(run.code, Some(1));
-    assert_eq!(run.stderr_lines().len(), 3, "{}", run.stderr);
+    assert_eq!(run.stderr_lines.len(), 3, "{}", run.stderr);
     assert!(!out.exists());
 }
 
 #[test]
 fn check_passes_on_an_identical_file() {
-    let (_tmp, out) = built("lexicon-check-same");
+    let (_tmp, out) = fresh_graph("lexicon-check-same");
     let run = build("layout", &out, &["--check"]);
     assert_eq!(run.code, Some(0), "{}", run.stderr);
 }
 
 #[test]
 fn check_fails_with_a_unified_diff_on_a_modified_file() {
-    let (_tmp, out) = built("lexicon-check-modified");
+    let (_tmp, out) = fresh_graph("lexicon-check-modified");
     let stale = fs::read_to_string(&out)
         .unwrap()
         .replace("\"Fig\"", "\"Old fig\"");
@@ -110,7 +109,7 @@ fn check_fails_with_a_unified_diff_on_a_modified_file() {
 
 #[test]
 fn check_flags_a_missing_trailing_newline() {
-    let (_tmp, out) = built("lexicon-check-newline");
+    let (_tmp, out) = fresh_graph("lexicon-check-newline");
     let json = fs::read_to_string(&out).unwrap();
     fs::write(&out, json.trim_end()).unwrap();
 
@@ -125,7 +124,7 @@ fn check_flags_a_missing_trailing_newline() {
 
 #[test]
 fn check_flags_crlf_line_endings() {
-    let (_tmp, out) = built("lexicon-check-crlf");
+    let (_tmp, out) = fresh_graph("lexicon-check-crlf");
     let json = fs::read_to_string(&out).unwrap();
     fs::write(&out, json.replace('\n', "\r\n")).unwrap();
 

@@ -37,7 +37,7 @@ enum Command {
         #[arg(long, value_name = "FILE")]
         out: Option<PathBuf>,
         /// Write nothing; exit 1 with a diff if the file is out of date, 2 if
-        /// it is missing
+        /// it is missing or unreadable
         #[arg(long)]
         check: bool,
     },
@@ -96,7 +96,8 @@ fn write_graph(out: &Path, json: &str) {
 }
 
 /// Compares `out` with `expected` byte for byte; on a difference prints a
-/// unified diff (expected → on disk) to stderr and exits 1.
+/// unified diff (expected → on disk) to stderr and exits 1. A missing or
+/// unreadable file exits 2.
 fn check_graph(out: &Path, expected: &str) {
     let on_disk = match std::fs::read(out) {
         Ok(bytes) => bytes,
@@ -128,9 +129,9 @@ fn check_graph(out: &Path, expected: &str) {
             )
     );
     if on_disk.contains('\r') {
-        eprintln!("{label} has CRLF line endings; graph.json uses LF only");
+        eprintln!("{label}: has CRLF line endings; graph.json uses LF only");
     }
-    eprintln!("{label} is out of date; run `lexicon build` to regenerate it");
+    eprintln!("{label}: out of date; run `lexicon build` to regenerate it");
     exit(EXIT_INVALID);
 }
 
