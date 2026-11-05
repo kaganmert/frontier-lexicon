@@ -4,7 +4,7 @@ import {
   conceptsIndexPath,
   getPublishedConcepts,
 } from "@/lib/concepts";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, mapPath } from "@/lib/site";
 
 export const dynamic = "force-static";
 
@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    { url: absoluteUrl(mapPath), changeFrequency: "weekly", priority: 0.9 },
     ...getPublishedConcepts().map((concept) => ({
       url: absoluteUrl(conceptPath(concept.slug)),
       changeFrequency: "monthly" as const,

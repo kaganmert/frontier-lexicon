@@ -4,7 +4,7 @@ import { JsonLd } from "@/components/json-ld";
 import { conceptsIndexPath } from "@/lib/concept-model";
 import { websiteJsonLd } from "@/lib/seo/jsonld";
 import { OG_SITE, ogImageMeta, openGraphBase } from "@/lib/og";
-import { siteDescription, siteName, siteUrl } from "@/lib/site";
+import { mapPath, siteDescription, siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -42,6 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               {siteName}
             </Link>
             <ul className="flex gap-4 text-sm">
+              <li>
+                <Link href={mapPath}>Map</Link>
+              </li>
               <li>
                 <Link href={conceptsIndexPath}>Concepts</Link>
               </li>

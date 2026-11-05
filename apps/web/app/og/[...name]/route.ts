@@ -3,12 +3,13 @@ import {
   getConcept,
   getPublishedConcepts,
 } from "@/lib/concepts";
-import { conceptOgName, ogImage, OG_INDEX, OG_SITE } from "@/lib/og";
+import { conceptOgName, ogImage, OG_INDEX, OG_MAP, OG_SITE } from "@/lib/og";
 import { siteDescription, siteName } from "@/lib/site";
 
 /**
  * OpenGraph images, one PNG per page, rendered at build time:
- * `/og/site.png`, `/og/concepts.png` and `/og/concepts/<slug>.png`.
+ * `/og/site.png`, `/og/concepts.png`, `/og/map.png` and
+ * `/og/concepts/<slug>.png`.
  *
  * A catch-all route handler is used instead of the `opengraph-image.tsx`
  * convention because Next does not allow that convention below an optional
@@ -21,6 +22,7 @@ export function generateStaticParams() {
   const names = [
     OG_SITE,
     OG_INDEX,
+    OG_MAP,
     ...getPublishedConcepts().map(({ slug }) => conceptOgName(slug)),
   ];
   return names.map((name) => ({ name: `${name}.png`.split("/") }));
@@ -39,6 +41,13 @@ export async function GET(
     return ogImage({
       title: "Concepts",
       subtitle: "Every concept, grouped by layer.",
+    });
+  }
+
+  if (key === OG_MAP) {
+    return ogImage({
+      title: "Map",
+      subtitle: "Every concept, layer by layer, and what comes before what.",
     });
   }
 

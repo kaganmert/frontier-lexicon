@@ -35,6 +35,9 @@ export function absoluteUrl(path: string): string {
   return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+/** The concept map (FLN-09). */
+export const mapPath = "/map/";
+
 /** Display order of the tracks; the single source for the enum everywhere. */
 export const tracks = ["shared", "coding", "research"] as const;
 export type Track = (typeof tracks)[number];

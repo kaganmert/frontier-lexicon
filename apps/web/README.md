@@ -56,7 +56,7 @@ Only `status: published` concepts reach the public site. Drafts are dropped with
 
 Bodies start at H2; the page renders the title as the only H1. Files sit directly in `content/concepts/` and are named `<slug>.mdx` with a lowercase kebab-case slug; subdirectories and other file names fail the build. Invalid front matter fails the build with the file name.
 
-With an empty `content/concepts/` the build still succeeds: the home page, `/concepts/`, `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt` and the site OG image are all produced, with explicit empty states.
+With an empty `content/concepts/` the build still succeeds: the home page, `/concepts/`, `/map/`, `sitemap.xml`, `robots.txt`, `llms.txt`, `llms-full.txt` and the site OG image are all produced, with explicit empty states.
 
 To add a concept: create `content/concepts/<slug>.mdx`, run the build. Nothing in this package needs to change.
 
@@ -68,11 +68,13 @@ To add a concept: create `content/concepts/<slug>.mdx`, run the build. Nothing i
 | `/concepts/`                                                  | `app/concepts/[[...slug]]/page.tsx` (index)           |
 | `/concepts/<slug>/`                                           | same file (lesson)                                    |
 | `/concepts/<slug>/index.md`                                   | written by `content-collections.ts`                   |
+| `/map/`                                                       | `app/map/page.tsx`                                    |
 | `/og/site.png`, `/og/concepts.png`, `/og/concepts/<slug>.png` | `app/og/[...name]/route.ts`                           |
+| `/og/map.png`                                                 | same file                                             |
 | `/sitemap.xml`, `/robots.txt`                                 | `app/sitemap.ts`, `app/robots.ts`                     |
 | `/llms.txt`, `/llms-full.txt`                                 | `app/llms.txt/route.ts`, `app/llms-full.txt/route.ts` |
 
-Pure helpers behind these live in `lib/seo/` (JSON-LD builders, `llms.txt` generators, robots rules, Markdown rendering) and are unit-tested with Vitest.
+Pure helpers behind these live in `lib/seo/` (JSON-LD builders, `llms.txt` generators, robots rules, Markdown rendering) and are unit-tested with Vitest, as are `lib/graph.ts` (the parsed `graph.json`), `lib/map-layout.ts` (map geometry) and `components/map-graph.tsx` (rendered with `react-dom/server`).
 
 ## Decisions and constraints
 
@@ -88,4 +90,6 @@ Pure helpers behind these live in `lib/seo/` (JSON-LD builders, `llms.txt` gener
 - **`llms.txt`** follows [llmstxt.org](https://llmstxt.org/). No major AI vendor commits to reading it; it costs nothing and the real wins are clean HTML, the sitemap, the robots rules and the per-page Markdown.
 - **Drafts are invisible to the public site.** The graph is seeded as `status: draft` front matter long before any lesson text exists, and the site is live. Pages and routes get concepts only from `lib/concepts.ts`, which has no unfiltered accessor, so a new route cannot forget the filter (see Content for the two filter points). Draft front matter is still compiled into the server bundle under `.next/`; only `out/` is deployed.
 - **Concept order is (layer, track, slug).** Slugs compare by code unit, the same byte order `lexicon-core` uses, so the site and `graph.json` list concepts identically. Titles are not used: `localeCompare` depends on the runtime's ICU data.
+- **The map is server-rendered SVG in fixed units.** `/map/` draws `content/graph.json` (written by `lexicon build`, so the site never needs Rust) as plain SVG on the server: no graph or canvas library, no layout in the browser. One unit is one CSS pixel at zoom 1: nodes are 160×36 with a 24 gap, bands 120 high, padding 24, so the width follows the widest layer. The server cannot measure text, so titles are cut at 20 characters with "…" and the full title is the node's `<title>`. Node `x` comes from `graph.json`; the vertical position comes from the layer's band, not `y`. Edges are straight lines between node boundaries; one spanning several layers crosses the bands in between. Published nodes are plain SVG `<a>` (not `next/link`, which drops the trailing slash outside a router); drafts show their title only, since `graph.json` carries no draft text. `lib/graph.ts` parses the file with zod at module load, so a malformed file fails the build with the field that is wrong.
+- **One hand-written client component, and it gets no graph.** `components/map-viewport.tsx` is the app's only `"use client"` file. The static export repeats every client prop in the RSC payload (`index.html`, `index.txt`, `__next.*.txt`), so it receives the server-rendered SVG as `children` and two numbers, and holds only the zoom factor: it sizes the box the SVG fills. Panning is native scrolling (touch, wheel, keyboard), plus a mouse drag that swallows the click it ends with. `ctrl` + wheel (a trackpad pinch) zooms around the pointer through a non-passive listener added in an effect, since React's `onWheel` is passive and could not stop the browser zooming the page; the buttons zoom around the centre. Without JavaScript the map is a scrollable 1:1 SVG whose links work. The wrapper breaks out of `<main>` to the full viewport width.
 - **JSON-LD** uses schema.org `WebSite`, `DefinedTermSet`, `DefinedTerm` and `BreadcrumbList`. Google shows no rich result for defined terms; the markup is there for semantic clarity, not traffic.

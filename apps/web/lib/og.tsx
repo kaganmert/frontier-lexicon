@@ -13,9 +13,10 @@ export const openGraphBase = {
   locale: "en_US",
 } satisfies Metadata["openGraph"];
 
-/** Image names: the two site-level cards, and `concepts/<slug>` per lesson. */
+/** Image names: the site-level cards, and `concepts/<slug>` per lesson. */
 export const OG_SITE = "site";
 export const OG_INDEX = "concepts";
+export const OG_MAP = "map";
 export const conceptOgName = (slug: string) => `concepts/${slug}`;
 
 /** Site-relative path of a page's OpenGraph image. */
