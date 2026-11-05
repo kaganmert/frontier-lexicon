@@ -1,0 +1,20 @@
+---
+title: "Compaction"
+description: "A harness feature that swaps older conversation turns for a model-written summary when the context nears its limit, so the session can go on."
+layer: 8
+track: coding
+status: draft
+question: "What does an agent lose when it summarises its own history to keep going?"
+prerequisites:
+  - harness
+  - context-window
+edges:
+  - type: MITIGATES
+    to: context-rot
+sources:
+  - title: "Claude docs: Compaction overview"
+    url: "https://platform.claude.com/docs/en/build-with-claude/compaction"
+  - title: "Claude Code docs: Manage costs effectively"
+    url: "https://code.claude.com/docs/en/costs"
+provenance: seed
+---
