@@ -6,8 +6,10 @@ track: coding
 status: draft
 question: "Why would you want an agent that is forbidden from changing anything?"
 prerequisites:
-  - permission-mode
-  - system-prompt
+  - harness
+edges:
+  - type: RELATED_TO
+    to: permission-mode
 sources:
   - title: "Claude Code docs: Common workflows"
     url: "https://code.claude.com/docs/en/common-workflows"

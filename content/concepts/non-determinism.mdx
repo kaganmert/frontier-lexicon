@@ -1,6 +1,6 @@
 ---
 title: "Non-determinism"
-description: "Sending identical input twice and getting different output, because tokens are sampled and because serving hardware batches requests."
+description: "Why repeated runs of one prompt can diverge: sampling picks among likely tokens, and batched GPU arithmetic is not bit-for-bit reproducible."
 layer: 1
 track: shared
 status: draft

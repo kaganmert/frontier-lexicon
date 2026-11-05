@@ -125,13 +125,22 @@ CI runs it on every pull request.
 The files carry nothing beyond the `provenance` value; the schema has no field
 for it.
 
-`scripts/check-overlap.mjs` compares every concept file with the dictionary at
-that commit (its entries and its README) and fails on any shared run of 8
-consecutive words; exit code 2 means the dictionary could not be fetched. An
-8-word window does not catch close paraphrase or a reused alias, so review
-those by eye. It needs
-network access, so CI does not run it; run it by hand whenever concept text
-changes and paste the output in the pull request:
+`scripts/check-overlap.mjs` compares every concept file with every Markdown
+file of the dictionary at that commit (its entries, its README and
+`internal/`, which holds the curriculum order) and fails on any shared run of
+8 consecutive words; exit code 2 means the dictionary could not be fetched. It
+checks wording only. Review these by eye against the entry of the same term:
+
+- close paraphrase: the same points in the same order, reworded;
+- aliases: none taken from an entry, including its _Avoid:_ and _Vendor
+  terms:_ lines;
+- arrangement: prerequisites that list the parts of the entry's definition,
+  or a chain of concepts that follows the curriculum order. Layers follow
+  `layerNames` in `apps/web/lib/site.ts`, so related terms share a layer; the
+  prerequisites inside and between layers are this project's own.
+
+The script needs network access, so CI does not run it; run it by hand whenever
+concept text changes and paste the output in the pull request:
 
 ```sh
 node scripts/check-overlap.mjs

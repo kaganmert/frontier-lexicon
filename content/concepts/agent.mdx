@@ -1,6 +1,6 @@
 ---
 title: "Agent"
-description: "A model that runs in a loop, choosing tool calls and reading their results until it decides the task is done."
+description: "A model put in charge of a task: it runs the agentic loop, choosing its own next step each round until it judges the task done."
 layer: 3
 track: shared
 status: draft
@@ -8,9 +8,7 @@ question: "What turns a chatbot into something that can carry out a task on its 
 aliases:
   - "AI agent"
 prerequisites:
-  - tool-calling
-  - system-prompt
-  - context-window
+  - agentic-loop
 sources:
   - title: "Building effective agents (Anthropic, 2024)"
     url: "https://www.anthropic.com/research/building-effective-agents"

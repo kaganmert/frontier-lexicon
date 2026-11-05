@@ -24,17 +24,18 @@ async function fetchText(url) {
   return res.text();
 }
 
-/** Every entry under dictionary/ plus the generated README that repeats them. */
+/**
+ * Every Markdown file in the repository: the entries under dictionary/, the
+ * README that repeats them, and internal/ (the curriculum order and the README
+ * template).
+ */
 async function dictionaryFiles() {
   const treeUrl = `https://api.github.com/repos/${DICTIONARY_REPO}/git/trees/${DICTIONARY_COMMIT}?recursive=1`;
   const { tree, truncated } = JSON.parse(await fetchText(treeUrl));
   if (truncated) throw new Error(`${treeUrl}: tree listing truncated`);
   const paths = tree
-    .map((entry) => entry.path)
-    .filter(
-      (p) =>
-        p === "README.md" || (p.startsWith("dictionary/") && p.endsWith(".md")),
-    );
+    .filter((entry) => entry.type === "blob" && entry.path.endsWith(".md"))
+    .map((entry) => entry.path);
   return Promise.all(
     paths.map(async (p) => {
       const encoded = p.split("/").map(encodeURIComponent).join("/");
